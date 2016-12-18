@@ -23,7 +23,7 @@ def send_msg(domains_blocked, dns_queries_today, ads_percentage_today, ads_block
 
 	json_body = [
 	    {
-	        "measurement": "piholestats",
+	        "measurement": "piholestats." + HOSTNAME.replace(".", "_"),
 	        "tags": {
 	            "host": HOSTNAME
 	        },
