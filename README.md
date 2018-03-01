@@ -9,5 +9,15 @@ To install and run the script as a service under SystemD. See: https://linuxconf
 
 You can set this up on pretty much any host that has access to the Pi-Hole API and the InfluxDB API. I opted to run it as a service on the Pi-Hole Host. It requires the http API to be enabled on Influx. It also requires a "pip install influxdb" to work. Tested on Ubuntu 16.04
 
+Put the piholestats.py in the /usr/local/bin/ folder. 
+save the piholeinflux.service file in the /etc/systemd/system/ directory.
+
+Run:
+ sudo systemctl --system daemon-reload
+to autostart after boot
+ sudo systemctl enable piholeinflux.service
+To start
+ sudo systemctl start piholeinflux.service 
+
 Dashboard Example: 
 ![Grafana Dashboard](http://i.imgur.com/4bitvQt.png)
