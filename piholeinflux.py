@@ -2,11 +2,14 @@
 
 from __future__ import print_function
 import requests
-import time
+from time import sleep, localtime, strftime
 from influxdb import InfluxDBClient
 from configparser import ConfigParser
 from os import path
 import traceback
+import sdnotify
+from datetime import datetime
+import sys
 
 HERE = path.dirname(path.realpath(__file__))
 config = ConfigParser()
@@ -28,6 +31,8 @@ INFLUXDB_CLIENT = InfluxDBClient(INFLUXDB_SERVER,
                                  INFLUXDB_PASSWORD,
                                  INFLUXDB_DATABASE)
 
+n = sdnotify.SystemdNotifier()
+n.notify("READY=1")
 
 def send_msg(resp):
     del resp['gravity_last_updated']
@@ -50,9 +55,14 @@ if __name__ == '__main__':
         try:
             api = requests.get(PIHOLE_API)  # URI to pihole server api
             send_msg(api.json())
-            time.sleep(DELAY)
+            timestamp = strftime('%Y-%m-%d %H:%M:%S %z', localtime())
+            n.notify('STATUS=Reported to InfluxDB at {}'.format(timestamp))
 
         except Exception as e:
-            print('Failed, to report to InfluxDB:', str(e))
+            msg = 'Failed, to report to InfluxDB:'
+            n.notify('STATUS={} {}'.format(msg, str(e)))
+            print(msg, str(e))
             print(traceback.format_exc())
-            time.sleep(DELAY)
+            sys.exit(1)
+
+        sleep(DELAY)
