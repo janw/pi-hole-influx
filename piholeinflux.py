@@ -22,46 +22,33 @@ INFLUXDB_USERNAME = config['influxdb']['username']
 INFLUXDB_PASSWORD = config['influxdb']['password']
 INFLUXDB_DATABASE = config['influxdb']['database']
 
-def send_msg():
+INFLUXDB_CLIENT = InfluxDBClient(INFLUXDB_SERVER,
+                                 INFLUXDB_PORT,
+                                 INFLUXDB_USERNAME,
+                                 INFLUXDB_PASSWORD,
+                                 INFLUXDB_DATABASE)
+
+
+def send_msg(resp):
 
     json_body = [
         {
-            "measurement": "pihole." + HOSTNAME.replace(".", "_"),
+            "measurement": "pihole",
             "tags": {
                 "host": HOSTNAME
             },
-            "fields": {
-                "domains_blocked": int(domains_blocked),
-                "dns_queries_today": int(dns_queries_today),
-                "ads_percentage_today": float(ads_percentage_today),
-                "ads_blocked_today": int(ads_blocked_today),
-                "unique_domains": int(unique_domains),
-                "queries_forwarded": int(queries_forwarded),
-                "queries_cached": int(queries_cached),
-                "clients_ever_seen": int(clients_ever_seen)
-            }
+            "fields": resp
         }
     ]
 
-    client = InfluxDBClient(INFLUXDB_SERVER, INFLUXDB_PORT, INFLUXDB_USERNAME, INFLUXDB_PASSWORD, INFLUXDB_DATABASE)
-    # client.create_database(INFLUXDB_DATABASE) # Uncomment to create the database (expected to exist prior to feeding it data)
-    client.write_points(json_body)
+    INFLUXDB_CLIENT.write_points(json_body)
+
 
 if __name__ == '__main__':
     while True:
         try:
-            api = requests.get(PIHOLE_API) # URI to pihole server api
-            API_out = api.json()
-            domains_blocked = (API_out['domains_being_blocked'])
-            dns_queries_today = (API_out['dns_queries_today'])
-            ads_percentage_today = (API_out['ads_percentage_today'])
-            ads_blocked_today = (API_out['ads_blocked_today'])
-            unique_domains = (API_out['unique_domains'])
-            queries_forwarded = (API_out['queries_forwarded'])
-            queries_cached = (API_out['queries_cached'])
-            clients_ever_seen = (API_out['clients_ever_seen'])
-
-            send_msg()
+            api = requests.get(PIHOLE_API)  # URI to pihole server api
+            send_msg(api.json())
             time.sleep(DELAY)
 
         except Exception as e:
