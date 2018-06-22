@@ -1,12 +1,13 @@
 
 [Unit]
-Description=PiHole Influx - Send pihole stats to influxdb for Grafana
+Description=Pi-hole-Influx - Send Pi-hole statistics to InfluxDB for visualization
 After=network-online.target
 
 [Service]
-User=XXXXXX
+User=pi
 Type=idle
-ExecStart=/usr/bin/python /usr/local/bin/piholeinflux.py > /tmp/pihole_influx.log 2>&1
+ExecStart=/usr/bin/python /home/pi/pi-hole-influx/piholeinflux.py > /tmp/pihole_influx.log 2>&1
 
 [Install]
 WantedBy=multi-user.target
+
