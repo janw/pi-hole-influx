@@ -1,7 +1,8 @@
 # Pi-hole-Influx
 
-A simple script to report Pi-Hole stats to an InfluxDB, ready to be displayed via Grafana (and potentially other visualization platforms)
+A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be displayed via Grafana.
 
+![Example Grafana Dashboard](.readme-assets/dashboard.png)
 
 ## Requirements and Setup
 
@@ -43,13 +44,26 @@ sudo systemctl start piholeinflux.service
 sudo systemctl status piholeinflux.service
 ```
 
-## Example Usage: Grafana Dashboard 
+The status should look as follows. Note the `Status:` line showing the last time, the daemon reported to InfluxDB:
 
-This is an example use case for the gathered data: creating a comprehensive Grafana dashbaord from it. The dashboard seen below can be imported into Grafana from the included `dashboard.json` file, or using ID [`6603` from Grafana's Dashboard Directory](https://grafana.com/dashboards/6603).
+```
+● piholeinflux.service - Pi-hole-Influx - Send Pi-hole statistics to InfluxDB for visualization
+   Loaded: loaded (/home/pi/pi-hole-influx/piholeinflux.service; enabled; vendor preset: enabled)
+   Active: active (running) since Fri 2018-06-22 19:03:56 UTC; 10min ago
+     Docs: https://github.com/janw/pi-hole-influx
+ Main PID: 21329 (python)
+   Status: "Reported to InfluxDB at 2018-06-22 19:14:09 +0000"
+   CGroup: /system.slice/piholeinflux.service
+           └─21329 /usr/bin/python /home/pi/pi-hole-influx/piholeinflux.py
+```
 
-![Grafana Dashboard](.readme-assets/dashboard.png)
 
 
-## Attribution
+## Set up a Grafana Dashboard 
+
+The example dashboard seen [at the top](#pi-hole-influx) uses the collected data and displays it in concise and sensible graphs and single stats. The dashboard can be imported into your Grafana instance from the `dashboard.json` file included in the repo, or by using ID `6603` to [import it from Grafana's Dashboard Directory](https://grafana.com/dashboards/6603).
+
+
+## Attributions
 
 The script originally [created by Jon Hayward](https://fattylewis.com/Graphing-pi-hole-stats/), adapted to work with InfluxDB [by /u/tollsjo in December 2016](https://github.com/sco01/piholestatus), and [improved and extended by @johnappletree](https://github.com/johnappletree/piholestatus). "If I have seen further it is by standing on the shoulders of giants". 🤓
