@@ -14,24 +14,26 @@ sudo apt update
 sudo apt install git python-pip -y
 ```
 
-Now clone the repo, and create the necessary files/symlinks
+Now clone the repo, install the Python dependencies, and make sure to copy and adjust the example configuation file to match your setup.
 
 ```bash
 git clone https://github.com/janw/pi-hole-influx.git ~/pi-hole-influx
+cd ~/pi-hole-influx
 
+# Install requirements via pip
+pip install -r requirements.txt
+
+# Copy config.example and modify it (should be self-explanatory)
+cp config.ini.example config.ini
+vi config.ini
+```
+
+Before starting the daemon for the first time, symlink the systemd service into place, reload, and enable the service.
+
+```bash
 sudo ln -s /home/pi/pi-hole-influx/piholeinflux.service /etc/systemd/system/
 sudo systemctl --system daemon-reload
 sudo systemctl enable piholeinflux.service
-```
-Before starting the daemon for the first time, install the Python dependencies, and make sure to copy and adjust the example configuation file to match your setup.
-
-```
-cd ~/pi-hole-influx
-
-pip install -r requirements.txt
-
-cp config.ini.example config.ini
-vi config.ini
 ```
 
 Now you're ready to start the daemon. Wait a few seconds to check its status.
@@ -41,9 +43,9 @@ sudo systemctl start piholeinflux.service
 sudo systemctl status piholeinflux.service
 ```
 
-Dashboard Example: 
-![Grafana Dashboard](http://i.imgur.com/4bitvQt.png)
+## Example Usage: Grafana Dashboard 
 
+![Grafana Dashboard](http://i.imgur.com/4bitvQt.png)
 
 ## Attribution
 
