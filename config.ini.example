@@ -1,0 +1,14 @@
+[influxdb]
+
+port = 8086
+hostname = 10.10.99.99
+username = pihole
+password = allthosebeautifulstats
+database = pihole
+
+[pihole]
+
+api_location = http://127.0.0.1/admin/api.php
+instance_name = 'pihole'
+reporting_interval = 10 #seconds
+
