@@ -1,14 +1,16 @@
 [influxdb]
 
 port = 8086
-hostname = 10.10.99.99
+hostname = 10.10.4.9
 username = pihole
-password = allthosebeautifulstats
+password = allthosesweetstatistics
 database = pihole
 
 [pihole]
 
 api_location = http://127.0.0.1/admin/api.php
-instance_name = 'pihole'
-reporting_interval = 10 #seconds
+instance_name = pihole
+
+# Time between reports to InfluxDB (in seconds)
+reporting_interval = 10
 
