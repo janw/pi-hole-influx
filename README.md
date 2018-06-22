@@ -45,8 +45,11 @@ sudo systemctl status piholeinflux.service
 
 ## Example Usage: Grafana Dashboard 
 
-![Grafana Dashboard](http://i.imgur.com/4bitvQt.png)
+This is an example use case for the gathered data: creating a comprehensive Grafana dashbaord from it. The dashboard seen below can be imported into Grafana from the included `dashboard.json` file, or using ID [`6603` from Grafana's Dashboard Directory](https://grafana.com/dashboards/6603).
+
+![Grafana Dashboard](.readme-assets/dashboard.png)
+
 
 ## Attribution
 
-The script originally [created by Jon Hayward](https://fattylewis.com/Graphing-pi-hole-stats/), adapted to work with InfluxDB [by /u/tollsjo in December 2016](https://github.com/sco01/piholestatus), and [improved and extended by @johnappletree](https://github.com/johnappletree/piholestatus).
+The script originally [created by Jon Hayward](https://fattylewis.com/Graphing-pi-hole-stats/), adapted to work with InfluxDB [by /u/tollsjo in December 2016](https://github.com/sco01/piholestatus), and [improved and extended by @johnappletree](https://github.com/johnappletree/piholestatus). "If I have seen further it is by standing on the shoulders of giants". 🤓
