@@ -30,6 +30,7 @@ INFLUXDB_CLIENT = InfluxDBClient(INFLUXDB_SERVER,
 
 
 def send_msg(resp):
+    del resp['gravity_last_updated']
 
     json_body = [
         {
