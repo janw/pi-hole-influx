@@ -35,7 +35,8 @@ n = sdnotify.SystemdNotifier()
 n.notify("READY=1")
 
 def send_msg(resp):
-    del resp['gravity_last_updated']
+    if 'gravity_last_updated' in resp:
+        del resp['gravity_last_updated']
 
     json_body = [
         {
