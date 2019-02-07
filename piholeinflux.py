@@ -14,15 +14,12 @@ HERE = path.dirname(path.realpath(__file__))
 config = ConfigParser()
 config.read(path.join(HERE, 'config.ini'))
 
-HOSTNAME = config['pihole']['instance_name']
-PIHOLE_API = config['pihole']['api_location']
-DELAY = config['pihole'].getint('reporting_interval', 10)
-
 INFLUXDB_SERVER = config['influxdb'].get('hostname', '127.0.0.1')
 INFLUXDB_PORT = config['influxdb'].getint('port', 8086)
 INFLUXDB_USERNAME = config['influxdb']['username']
 INFLUXDB_PASSWORD = config['influxdb']['password']
 INFLUXDB_DATABASE = config['influxdb']['database']
+REPORTING_INTERVAL = config['influxdb'].getint('reporting_interval', 10)
 
 INFLUXDB_CLIENT = InfluxDBClient(INFLUXDB_SERVER,
                                  INFLUXDB_PORT,
@@ -34,7 +31,20 @@ n = sdnotify.SystemdNotifier()
 n.notify("READY=1")
 
 
-def send_msg(resp):
+class Pihole(object):
+    def __init__(self, config):
+        self.name = config.name
+        self.url = config["api_location"]
+        if "instance_name" in config:
+            self.name = config["instance_name"]
+
+    def get_data(self):
+        response = requests.get(self.url)
+        if response.status_code == 200:
+            return response.json()
+
+
+def send_msg(resp, name):
     if 'gravity_last_updated' in resp:
         del resp['gravity_last_updated']
 
@@ -42,7 +52,7 @@ def send_msg(resp):
         {
             "measurement": "pihole",
             "tags": {
-                "host": HOSTNAME
+                "host": name
             },
             "fields": resp
         }
@@ -52,10 +62,12 @@ def send_msg(resp):
 
 
 if __name__ == '__main__':
+    piholes = [Pihole(s) for s in config.sections() if s != "influxdb"]
     while True:
         try:
-            api = requests.get(PIHOLE_API)  # URI to pihole server api
-            send_msg(api.json())
+            for pi in piholes:
+                data = pi.get_data()
+                send_msg(data, pi.name)
             timestamp = strftime('%Y-%m-%d %H:%M:%S %z', localtime())
             n.notify('STATUS=Reported to InfluxDB at {}'.format(timestamp))
 
@@ -66,4 +78,4 @@ if __name__ == '__main__':
             print(traceback.format_exc())
             sys.exit(1)
 
-        sleep(DELAY)
+        sleep(REPORTING_INTERVAL)
