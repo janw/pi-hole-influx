@@ -6,11 +6,14 @@ username = pihole
 password = allthosesweetstatistics
 database = pihole
 
-[pihole]
-
-api_location = http://127.0.0.1/admin/api.php
-instance_name = pihole
-
 # Time between reports to InfluxDB (in seconds)
 reporting_interval = 10
 
+
+[pihole]
+api_location = http://127.0.0.1/admin/api.php
+instance_name = pihole
+
+#[pihole_2]
+#api_location = http://192.168.0.1/admin/api.php
+#instance_name = second_pihole
