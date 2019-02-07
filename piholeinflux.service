@@ -8,7 +8,7 @@ After=network-online.target
 User=pi
 Type=notify
 Environment=PYTHONUNBUFFERED=true
-ExecStart=/usr/bin/python /home/pi/pi-hole-influx/piholeinflux.py
+ExecStart=/usr/bin/python3 /home/pi/pi-hole-influx/piholeinflux.py
 Restart=always
 RestartSec=30
 

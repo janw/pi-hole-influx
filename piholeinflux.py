@@ -8,7 +8,6 @@ from configparser import ConfigParser
 from os import path
 import traceback
 import sdnotify
-from datetime import datetime
 import sys
 
 HERE = path.dirname(path.realpath(__file__))
@@ -33,6 +32,7 @@ INFLUXDB_CLIENT = InfluxDBClient(INFLUXDB_SERVER,
 
 n = sdnotify.SystemdNotifier()
 n.notify("READY=1")
+
 
 def send_msg(resp):
     if 'gravity_last_updated' in resp:
