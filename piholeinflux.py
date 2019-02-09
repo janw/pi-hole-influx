@@ -62,7 +62,7 @@ def send_msg(resp, name):
 
 
 if __name__ == '__main__':
-    piholes = [Pihole(s) for s in config.sections() if s != "influxdb"]
+    piholes = [Pihole(config[s]) for s in config.sections() if s != "influxdb"]
     while True:
         try:
             for pi in piholes:
