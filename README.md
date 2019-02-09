@@ -1,5 +1,7 @@
 # Pi-hole-Influx
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/522433a84177441c917768f4621f1b09)](https://app.codacy.com/app/janw/pi-hole-influx?utm_source=github.com&utm_medium=referral&utm_content=janw/pi-hole-influx&utm_campaign=Badge_Grade_Dashboard)
+
 A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be displayed via Grafana.
 
 ![Example Grafana Dashboard](.readme-assets/dashboard.png)
