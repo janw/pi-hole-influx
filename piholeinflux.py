@@ -7,14 +7,16 @@ from influxdb import InfluxDBClient
 from configparser import ConfigParser
 from os import path
 from urllib.parse import urlparse
+from shutil import copyfile
 import traceback
 import sdnotify
 import sys
 
 HERE = path.dirname(path.realpath(__file__))
+CONFIG_FILE = path.join(HERE, 'config.ini')
+
 
 n = sdnotify.SystemdNotifier()
-n.notify("READY=1")
 
 
 class Pihole:
@@ -37,64 +39,68 @@ class Pihole:
             return response.json()
 
 
-def send_msg(influxdb, resp, name):
-    """Write the Pi-hole response data to the InfluxDB."""
-    if "gravity_last_updated" in resp:
-        del resp["gravity_last_updated"]
+class Daemon(object):
+    def __init__(self, config):
+        self.influx = InfluxDBClient(
+            host=config['influxdb'].get('hostname', '127.0.0.1'),
+            port=config['influxdb'].getint('port', 8086),
+            username=config['influxdb']['username'],
+            password=config['influxdb']['password'],
+            database=config['influxdb']['database']
+        )
 
-    # Monkey-patch ads-% to be always float (type not enforced at API level)
-    resp["ads_percentage_today"] = float(resp.get("ads_percentage_today", 0.0))
+        self.piholes = [
+            Pihole(config[s]) for s in config.sections()
+            if s != "influxdb"
+        ]
 
-    json_body = [{"measurement": "pihole", "tags": {"host": name}, "fields": resp}]
+        self.interval = config['influxdb'].getint('reporting_interval', 10)
 
-    influxdb.write_points(json_body)
-
-
-def main(single_run=False):
-    """Main application daemon."""
-    config = ConfigParser()
-    config.read_file(open(path.join(HERE, "config.ini")))
-
-    influxdb_server = config["influxdb"].get("hostname", "127.0.0.1")
-    influxdb_port = config["influxdb"].getint("port", 8086)
-    influxdb_username = config["influxdb"]["username"]
-    influxdb_password = config["influxdb"]["password"]
-    influxdb_database = config["influxdb"]["database"]
-    reporting_interval = config["influxdb"].getint("reporting_interval", 10)
-
-    influxdb_client = InfluxDBClient(
-        influxdb_server,
-        influxdb_port,
-        influxdb_username,
-        influxdb_password,
-        influxdb_database,
-    )
-    piholes = [
-        Pihole(config[section])
-        for section in config.sections()
-        if section not in ("influxdb", "defaults")
-    ]
-
-    while True:
-        try:
-            for pi in piholes:
+    def run(self):
+        while True:
+            for pi in self.piholes:
                 data = pi.get_data()
-                send_msg(influxdb_client, data, pi.name)
-            timestamp = strftime("%Y-%m-%d %H:%M:%S %z", localtime())
-            n.notify("STATUS=Reported to InfluxDB at {}".format(timestamp))
+                self.send_msg(data, pi.name)
+            timestamp = strftime('%Y-%m-%d %H:%M:%S %z', localtime())
 
-        except Exception as e:
-            msg = "Failed, to report to InfluxDB:"
-            n.notify("STATUS={} {}".format(msg, str(e)))
-            print(msg, str(e))
-            print(traceback.format_exc())
-            sys.exit(1)
+            n.notify('STATUS=Last report to InfluxDB at {}'.format(timestamp))
+            n.notify("READY=1")
+            sleep(self.interval)
 
-        if single_run:
-            break
-        else:
-            sleep(reporting_interval)  # pragma: no cover
+    def send_msg(self, resp, name):
+        if 'gravity_last_updated' in resp:
+            del resp['gravity_last_updated']
+
+        json_body = [
+            {
+                "measurement": "pihole",
+                "tags": {
+                    "host": name
+                },
+                "fields": resp
+            }
+        ]
+
+        self.influx.write_points(json_body)
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    config = ConfigParser()
+    config.read(CONFIG_FILE)
+
+    if len(config) < 2 and not path.isfile(CONFIG_FILE):
+        copyfile(path.join(HERE, "config.ini.example"), CONFIG_FILE)
+        print("Created config file from example. Please "
+              "modify to your needs, and restart.")
+        sys.exit(0)
+
+    daemon = Daemon(config)
+
+    try:
+        daemon.run()
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except Exception as e:
+        print(str(e))
+        print(traceback.format_exc())
+        sys.exit(1)
