@@ -13,7 +13,9 @@ reporting_interval = 10
 [pihole]
 api_location = http://127.0.0.1/admin/api.php
 instance_name = pihole
+timeout = 10
 
 #[pihole_2]
 #api_location = http://192.168.0.1/admin/api.php
 #instance_name = second_pihole
+#timeout = 10

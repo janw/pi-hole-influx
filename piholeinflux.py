@@ -35,11 +35,12 @@ class Pihole(object):
     def __init__(self, config):
         self.name = config.name
         self.url = config["api_location"]
+        self.timeout = config.getint("timeout", 10)
         if "instance_name" in config:
             self.name = config["instance_name"]
 
     def get_data(self):
-        response = requests.get(self.url)
+        response = requests.get(self.url, timeout=self.timeout)
         if response.status_code == 200:
             return response.json()
 
