@@ -63,6 +63,23 @@ The status should look as follows. Note the `Status:` line showing the last time
 
 The example dashboard seen [at the top](#pi-hole-influx) uses the collected data and displays it in concise and sensible graphs and single stats. The dashboard can be imported into your Grafana instance from the `dashboard.json` file included in the repo, or by using ID `6603` to [import it from Grafana's Dashboard Directory](https://grafana.com/dashboards/6603).
 
+## Monitoring multiple Pi-holes
+
+As shown in the example configuration, it is possibe to add more than one Pi-hole instance to be monitored. Simply duplicate the `[pihole]` section and its config entries, and rename it to another unique name, like so:
+
+```
+[pihole]
+api_location = http://127.0.0.1/admin/api.php
+instance_name = pihole
+timeout = 10
+
+[pihole_2]
+api_location = http://192.168.27.42/admin/api.php
+instance_name = second_pihole
+timeout = 10
+```
+
+The config entries for `instance_name`, and `timeout` are optional; the instance name defaults to the config section name (`pihole_2` in this case), the connection timeout will be 10 seconds by default.
 
 ## Attributions
 
