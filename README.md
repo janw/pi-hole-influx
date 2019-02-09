@@ -46,7 +46,7 @@ sudo systemctl status piholeinflux.service
 
 The status should look as follows. Note the `Status:` line showing the last time, the daemon reported to InfluxDB:
 
-```
+```text
 ● piholeinflux.service - Pi-hole-Influx - Send Pi-hole statistics to InfluxDB for visualization
    Loaded: loaded (/home/pi/pi-hole-influx/piholeinflux.service; enabled; vendor preset: enabled)
    Active: active (running) since Fri 2018-06-22 19:03:56 UTC; 10min ago
@@ -57,8 +57,6 @@ The status should look as follows. Note the `Status:` line showing the last time
            └─21329 /usr/bin/python /home/pi/pi-hole-influx/piholeinflux.py
 ```
 
-
-
 ## Set up a Grafana Dashboard
 
 The example dashboard seen [at the top](#pi-hole-influx) uses the collected data and displays it in concise and sensible graphs and single stats. The dashboard can be imported into your Grafana instance from the `dashboard.json` file included in the repo, or by using ID `6603` to [import it from Grafana's Dashboard Directory](https://grafana.com/dashboards/6603).
@@ -67,7 +65,7 @@ The example dashboard seen [at the top](#pi-hole-influx) uses the collected data
 
 As shown in the example configuration, it is possibe to add more than one Pi-hole instance to be monitored. Simply duplicate the `[pihole]` section and its config entries, and rename it to another unique name, like so:
 
-```
+```ini
 [pihole]
 api_location = http://127.0.0.1/admin/api.php
 instance_name = pihole
