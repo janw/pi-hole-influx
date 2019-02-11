@@ -7,9 +7,39 @@
 
 A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be displayed via Grafana.
 
+**Heads-up: the configuration options changed fundamentally in recent versions. Please read up on the current state below.**
+
 ![Example Grafana Dashboard](.readme-assets/dashboard.png)
 
-## Requirements and Setup
+## Setup (Using Docker)
+
+To use docker for running the daemon, use the following command:
+
+```bash
+docker run \
+-e DATABASE_URL="influxdb://pihole:mysecretpassword@hostname" \
+-e PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php" \
+janw/pi-hole-influx
+```
+
+Note, that the `DATABASE_URL` variable contains the InfluxDB connection details in popular URL format inspired by [SQLAlchemy](https://docs.sqlalchemy.org/en/latest/core/engines.html), i.e.
+
+```bash
+DATABASE_URL="influxdb://<username>:<password>@<hostname>[:<port]>[/<database>]"
+```
+
+If port and database are not given, they default to `8086`, and `pihole`, respectively.
+
+`PIHOLE_INSTANCES` contains the Pi-hole instances that are to be reported. Multiple instances can be seperated by comma:
+
+```bash
+PIHOLE_INSTANCES="[<name>=]http://127.0.0.1/admin/api.php,[<second_name>=]http://192.168.42.79/admin/api.php[,…]"
+```
+
+Note that instances can be prefixed by a custom name, separated by an equal sign.
+
+
+## Setup (Traditional Way)
 
 As Pi-hole (as the name suggests) is built specifically with the Raspberry Pi in mind (and I run it on there as well), the following steps assume an instance of Pi-hole on Raspbian Strech Lite, with no additional modifications so far. Piholestatus will be configured to run on the same Pi.
 
@@ -68,21 +98,13 @@ The example dashboard seen [at the top](#pi-hole-influx) uses the collected data
 
 ## Monitoring multiple Pi-holes
 
-As shown in the example configuration, it is possibe to add more than one Pi-hole instance to be monitored. Simply duplicate the `[pihole]` section and its config entries, and rename it to another unique name, like so:
+As shown in the example configuration, it is possibe to add more than one Pi-hole instance to be monitored. Simply add more instances to the `[pihole]`, using a different name for the instance as a config entry, like so:
 
 ```ini
 [pihole]
-api_location = http://127.0.0.1/admin/api.php
-instance_name = pihole
-timeout = 10
-
-[pihole_2]
-api_location = http://192.168.27.42/admin/api.php
-instance_name = second_pihole
-timeout = 10
+pihole = http://127.0.0.1/admin/api.php
+second_pihole = http://192.168.27.42/admin/api.php
 ```
-
-The config entries for `instance_name`, and `timeout` are optional; the instance name defaults to the config section name (`pihole_2` in this case), the connection timeout will be 10 seconds by default.
 
 ## Attributions
 
