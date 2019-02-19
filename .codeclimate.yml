@@ -3,5 +3,3 @@ plugins:
     enabled: true
   sonar-python:
     enabled: true
-  markdownlint:
-    enabled: true
