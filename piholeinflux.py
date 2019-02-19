@@ -42,6 +42,9 @@ def send_msg(influxdb, resp, name):
     if "gravity_last_updated" in resp:
         del resp["gravity_last_updated"]
 
+    # Monkey-patch ads-% to be always float (type not enforced at API level)
+    resp["ads_percentage_today"] = float(resp.get("ads_percentage_today", 0.0))
+
     json_body = [{"measurement": "pihole", "tags": {"host": name}, "fields": resp}]
 
     influxdb.write_points(json_body)
