@@ -1,5 +1,6 @@
 # Pi-hole-Influx
 
+[![Build Status](https://travis-ci.org/janw/pi-hole-influx.svg?branch=master)](https://travis-ci.org/janw/pi-hole-influx)
 [![Maintainability](https://api.codeclimate.com/v1/badges/cfe71020e6505ca65cfc/maintainability)](https://codeclimate.com/github/janw/pi-hole-influx/maintainability)
 [![Coverage Status](https://coveralls.io/repos/github/janw/pi-hole-influx/badge.svg?branch=master)](https://coveralls.io/github/janw/pi-hole-influx?branch=master)
 
