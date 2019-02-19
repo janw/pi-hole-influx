@@ -1,0 +1,31 @@
+dist: xenial
+language: python
+python: 3.5
+cache: pip
+
+install:
+  - pip install -U black pytest pytest-cov coveralls \
+    flake8 flake8-bugbear flake8-docstrings flake8-todo flake8-eradicate
+  - pip install -r requirements.txt
+
+env:
+- TEST_CMD="pytest"
+
+script:
+- $TEST_CMD
+
+after_success:
+ - if [[ $TRAVIS_PYTHON_VERSION == 3.5 ]]; then coveralls; fi
+
+matrix:
+  include:
+    - name: "black"
+      env:
+        - TEST_CMD="black --check --verbose ."
+    - name: "flake8"
+      env:
+        - TEST_CMD="flake8 piholeinflux.py tests/test_*.py"
+    - name: "3.6"
+      python: 3.6
+    - name: "3.7"
+      python: 3.7
