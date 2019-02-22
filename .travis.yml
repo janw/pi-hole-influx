@@ -4,9 +4,12 @@ python: 3.6
 cache: pip
 
 install:
-  - pip install -U pytest
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then pip install -U black pytest-cov
-      coveralls flake8 flake8-bugbear flake8-docstrings flake8-todo flake8-eradicate; fi
+  - pip install pytest
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] && [[ "$TEST_CMD" == "pytest" ]]; then
+      pip install pytest-cov coveralls; fi
+  - if [[ $TEST_CMD == black* ]]; then pip install black; fi
+  - if [[ $TEST_CMD == flake8* ]]; then pip install flake8 flake8-bugbear
+      flake8-docstrings flake8-todo flake8-eradicate; fi
   - pip install -r requirements.txt
 
 env:
