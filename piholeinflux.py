@@ -6,6 +6,7 @@ from time import sleep, localtime, strftime
 from influxdb import InfluxDBClient
 from configparser import ConfigParser
 from os import path
+from urllib.parse import urlparse
 import traceback
 import sdnotify
 import sys
@@ -37,11 +38,14 @@ class Pihole:
     """Container object for a single Pi-hole instance."""
 
     def __init__(self, config):
-        self.name = config.name
         self.url = config["api_location"]
-        self.timeout = config.getint("timeout", 10)
+        self.timeout = int(config.get("timeout", 10))
         if "instance_name" in config:
             self.name = config["instance_name"]
+        elif hasattr(config, "name"):
+            self.name = config.name
+        else:
+            self.name = urlparse(self.url).netloc
 
     def get_data(self):
         """Retrieve API data from Pi-hole, and return as dict on success."""

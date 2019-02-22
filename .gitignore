@@ -1,1 +1,4 @@
 config.ini
+.coverage
+htmlcov/
+venv/
