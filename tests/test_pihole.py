@@ -2,6 +2,7 @@ from piholeinflux import Pihole
 
 
 def test_pihole_init():
+    """Test object initialization."""
     config = {"api_location": "http://here.example"}
 
     pihole = Pihole(config)
