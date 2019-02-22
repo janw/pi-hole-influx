@@ -12,23 +12,6 @@ import sdnotify
 import sys
 
 HERE = path.dirname(path.realpath(__file__))
-config = ConfigParser()
-config.read(path.join(HERE, "config.ini"))
-
-INFLUXDB_SERVER = config["influxdb"].get("hostname", "127.0.0.1")
-INFLUXDB_PORT = config["influxdb"].getint("port", 8086)
-INFLUXDB_USERNAME = config["influxdb"]["username"]
-INFLUXDB_PASSWORD = config["influxdb"]["password"]
-INFLUXDB_DATABASE = config["influxdb"]["database"]
-REPORTING_INTERVAL = config["influxdb"].getint("reporting_interval", 10)
-
-INFLUXDB_CLIENT = InfluxDBClient(
-    INFLUXDB_SERVER,
-    INFLUXDB_PORT,
-    INFLUXDB_USERNAME,
-    INFLUXDB_PASSWORD,
-    INFLUXDB_DATABASE,
-)
 
 n = sdnotify.SystemdNotifier()
 n.notify("READY=1")
@@ -54,23 +37,41 @@ class Pihole:
             return response.json()
 
 
-def send_msg(resp, name):
+def send_msg(influxdb, resp, name):
     """Write the Pi-hole response data to the InfluxDB."""
     if "gravity_last_updated" in resp:
         del resp["gravity_last_updated"]
 
     json_body = [{"measurement": "pihole", "tags": {"host": name}, "fields": resp}]
 
-    INFLUXDB_CLIENT.write_points(json_body)
+    influxdb.write_points(json_body)
 
 
 if __name__ == "__main__":
+    config = ConfigParser()
+    config.read(path.join(HERE, "config.ini"))
+
+    influxdb_server = config["influxdb"].get("hostname", "127.0.0.1")
+    influxdb_port = config["influxdb"].getint("port", 8086)
+    influxdb_username = config["influxdb"]["username"]
+    influxdb_password = config["influxdb"]["password"]
+    influxdb_database = config["influxdb"]["database"]
+    reporting_interval = config["influxdb"].getint("reporting_interval", 10)
+
+    influxdb_client = InfluxDBClient(
+        influxdb_server,
+        influxdb_port,
+        influxdb_username,
+        influxdb_password,
+        influxdb_database,
+    )
+
     piholes = [Pihole(config[s]) for s in config.sections() if s != "influxdb"]
     while True:
         try:
             for pi in piholes:
                 data = pi.get_data()
-                send_msg(data, pi.name)
+                send_msg(influxdb_client, data, pi.name)
             timestamp = strftime("%Y-%m-%d %H:%M:%S %z", localtime())
             n.notify("STATUS=Reported to InfluxDB at {}".format(timestamp))
 
@@ -81,4 +82,4 @@ if __name__ == "__main__":
             print(traceback.format_exc())
             sys.exit(1)
 
-        sleep(REPORTING_INTERVAL)
+        sleep(reporting_interval)
