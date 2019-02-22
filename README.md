@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/janw/pi-hole-influx.svg?branch=master)](https://travis-ci.org/janw/pi-hole-influx)
 [![Maintainability](https://api.codeclimate.com/v1/badges/cfe71020e6505ca65cfc/maintainability)](https://codeclimate.com/github/janw/pi-hole-influx/maintainability)
 [![Coverage Status](https://coveralls.io/repos/github/janw/pi-hole-influx/badge.svg?branch=master)](https://coveralls.io/github/janw/pi-hole-influx?branch=master)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be displayed via Grafana.
 
