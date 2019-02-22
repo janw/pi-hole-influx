@@ -47,7 +47,8 @@ def send_msg(influxdb, resp, name):
     influxdb.write_points(json_body)
 
 
-if __name__ == "__main__":
+def main():
+    """Main application daemon."""
     config = ConfigParser()
     config.read(path.join(HERE, "config.ini"))
 
@@ -83,3 +84,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
         sleep(reporting_interval)
+
+
+if __name__ == "__main__":
+    main()
