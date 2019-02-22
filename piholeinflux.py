@@ -33,7 +33,9 @@ n = sdnotify.SystemdNotifier()
 n.notify("READY=1")
 
 
-class Pihole(object):
+class Pihole:
+    """Container object for a single Pi-hole instance."""
+
     def __init__(self, config):
         self.name = config.name
         self.url = config["api_location"]
@@ -42,12 +44,14 @@ class Pihole(object):
             self.name = config["instance_name"]
 
     def get_data(self):
+        """Retrieve API data from Pi-hole, and return as dict on success."""
         response = requests.get(self.url, timeout=self.timeout)
         if response.status_code == 200:
             return response.json()
 
 
 def send_msg(resp, name):
+    """Write the Pi-hole response data to the InfluxDB."""
     if "gravity_last_updated" in resp:
         del resp["gravity_last_updated"]
 
