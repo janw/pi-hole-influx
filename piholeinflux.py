@@ -67,7 +67,13 @@ def main():
         influxdb_database,
     )
 
-    piholes = [Pihole(config[s]) for s in config.sections() if s != "influxdb"]
+    print(config.sections())
+
+    piholes = [
+        Pihole(config[section])
+        for section in config.sections()
+        if section not in ("influxdb", "defaults")
+    ]
     while True:
         try:
             for pi in piholes:
