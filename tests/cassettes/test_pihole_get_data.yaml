@@ -1,0 +1,25 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.21.0]
+    method: GET
+    uri: http://127.0.0.1:8080/admin/api.php
+  response:
+    body: {string: '{"domains_being_blocked":109200,"dns_queries_today":18596,"ads_blocked_today":732,"ads_percentage_today":3.93633,"unique_domains":2408,"queries_forwarded":5033,"queries_cached":12831,"clients_ever_seen":28,"unique_clients":25,"dns_queries_all_types":18596,"reply_NODATA":4457,"reply_NXDOMAIN":720,"reply_CNAME":4846,"reply_IP":8123,"privacy_level":0,"status":"enabled","gravity_last_updated":{"file_exists":true,"absolute":1550974989,"relative":{"days":"1","hours":"17","minutes":"28"}}}'}
+    headers:
+      Cache-Control: ['no-store, no-cache, must-revalidate']
+      Content-Length: ['487']
+      Content-type: [application/json]
+      Date: ['Mon, 25 Feb 2019 19:51:36 GMT']
+      Expires: ['Thu, 19 Nov 1981 08:52:00 GMT']
+      Pragma: [no-cache]
+      Server: [lighttpd/1.4.45]
+      Set-Cookie: [PHPSESSID=ltpa1m1eatesvl0jqi2fq6mqn5; path=/]
+      X-Frame-Options: [DENY]
+      X-Pi-hole: [The Pi-hole Web interface is working!]
+    status: {code: 200, message: OK}
+version: 1
