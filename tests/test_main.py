@@ -1,5 +1,3 @@
-from piholeinflux import main
-
 CONFIG_FILE_CONTENT = """
 [defaults]
 
@@ -19,4 +17,5 @@ api_location = http://127.0.0.1:8080/admin/api.php
 
 
 def test_main(mocker):
+    """Test main function executed when running the daemon."""
     pass
