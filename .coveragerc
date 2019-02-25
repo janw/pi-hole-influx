@@ -1,5 +1,7 @@
 [run]
-omit = tests/*
+omit =
+    tests/*
+    venv/*
 
 [report]
 # Regexes for lines to exclude from consideration
