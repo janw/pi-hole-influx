@@ -1,3 +1,4 @@
 pytest>=4.3.0
 pytest-vcr>=1.0.1
 pytest-cov>=2.6.1
+pytest-mock>1.10.1
