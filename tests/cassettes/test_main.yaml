@@ -1,0 +1,49 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.21.0]
+    method: GET
+    uri: http://127.0.0.1:8080/admin/api.php
+  response:
+    body: {string: '{"domains_being_blocked":109200,"dns_queries_today":27686,"ads_blocked_today":2720,"ads_percentage_today":9.82446,"unique_domains":4284,"queries_forwarded":8135,"queries_cached":16831,"clients_ever_seen":34,"unique_clients":26,"dns_queries_all_types":27686,"reply_NODATA":5577,"reply_NXDOMAIN":1239,"reply_CNAME":6911,"reply_IP":11253,"privacy_level":0,"status":"enabled","gravity_last_updated":{"file_exists":true,"absolute":1550974989,"relative":{"days":"6","hours":"16","minutes":"38"}}}'}
+    headers:
+      Cache-Control: ['no-store, no-cache, must-revalidate']
+      Content-Length: ['490']
+      Content-type: [application/json]
+      Date: ['Sat, 02 Mar 2019 19:01:53 GMT']
+      Expires: ['Thu, 19 Nov 1981 08:52:00 GMT']
+      Pragma: [no-cache]
+      Server: [lighttpd/1.4.45]
+      Set-Cookie: [PHPSESSID=unjjrt3h08nqfddheadps7ngv4; path=/]
+      X-Frame-Options: [DENY]
+      X-Pi-hole: [The Pi-hole Web interface is working!]
+    status: {code: 200, message: OK}
+- request:
+    body: 'pihole,host=pihole ads_blocked_today=2720i,ads_percentage_today=9.82446,clients_ever_seen=34i,dns_queries_all_types=27686i,dns_queries_today=27686i,domains_being_blocked=109200i,privacy_level=0i,queries_cached=16831i,queries_forwarded=8135i,reply_CNAME=6911i,reply_IP=11253i,reply_NODATA=5577i,reply_NXDOMAIN=1239i,status="enabled",unique_clients=26i,unique_domains=4284i
+
+'
+    headers:
+      Accept: [text/plain]
+      Accept-Encoding: ['gzip, deflate']
+      Authorization: [Basic cGlob2xlOmFsbHRob3Nlc3dlZXR1bXN0YXRpc3RpY3M=]
+      Connection: [keep-alive]
+      Content-Length: ['372']
+      Content-Type: [application/octet-stream]
+      User-Agent: [python-requests/2.21.0]
+    method: POST
+    uri: http://10.10.10.1:8086/write?db=pihole
+  response:
+    body: {string: ''}
+    headers:
+      Content-Type: [application/json]
+      Date: ['Sat, 02 Mar 2019 19:01:53 GMT']
+      Request-Id: [a4b98c69-3d1d-11e9-9988-0242ac12000a]
+      X-Influxdb-Build: [OSS]
+      X-Influxdb-Version: [1.7.4]
+      X-Request-Id: [a4b98c69-3d1d-11e9-9988-0242ac12000a]
+    status: {code: 204, message: No Content}
+version: 1

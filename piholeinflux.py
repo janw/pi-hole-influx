@@ -47,10 +47,10 @@ def send_msg(influxdb, resp, name):
     influxdb.write_points(json_body)
 
 
-def main():
+def main(single_run=False):
     """Main application daemon."""
     config = ConfigParser()
-    config.read(path.join(HERE, "config.ini"))
+    config.read_file(open(path.join(HERE, "config.ini")))
 
     influxdb_server = config["influxdb"].get("hostname", "127.0.0.1")
     influxdb_port = config["influxdb"].getint("port", 8086)
@@ -66,14 +66,12 @@ def main():
         influxdb_password,
         influxdb_database,
     )
-
-    print(config.sections())
-
     piholes = [
         Pihole(config[section])
         for section in config.sections()
         if section not in ("influxdb", "defaults")
     ]
+
     while True:
         try:
             for pi in piholes:
@@ -89,7 +87,10 @@ def main():
             print(traceback.format_exc())
             sys.exit(1)
 
-        sleep(reporting_interval)
+        if single_run:
+            break
+        else:
+            sleep(reporting_interval)  # pragma: no cover
 
 
 if __name__ == "__main__":
