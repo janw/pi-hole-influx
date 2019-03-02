@@ -1,3 +1,7 @@
+checks:
+    method-complexity:
+    config:
+      threshold: 10
 plugins:
   fixme:
     enabled: true
