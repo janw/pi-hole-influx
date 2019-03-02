@@ -37,7 +37,7 @@ def test_main(mocker):
     with mock_config:
         main(single_run=True)
 
-    mock_config.assert_called()
+    mock_config.assert_called_with(path.join(HERE, "config.ini"))
 
 
 @pytest.mark.vcr()
