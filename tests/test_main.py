@@ -1,4 +1,5 @@
 import io
+from os import path
 
 import pytest
 from piholeinflux import main
@@ -23,6 +24,7 @@ api_location = http://127.0.0.1:8080/admin/api.php
 CONFIG_FILE_CONTENT_INSTANCE_NAME = (
     CONFIG_FILE_CONTENT + "instance_name = testinstance\n"
 )
+HERE = path.dirname(path.dirname(path.realpath(__file__)))
 
 
 @pytest.mark.vcr()
@@ -48,7 +50,7 @@ def test_main_instance_name(mocker):
     with mock_config:
         main(single_run=True)
 
-    mock_config.assert_called()
+    mock_config.assert_called_with(path.join(HERE, "config.ini"))
 
 
 @pytest.mark.vcr()
