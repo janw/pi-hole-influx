@@ -5,15 +5,16 @@ cache: pip
 
 install:
   - pip install pytest pytest-cov
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] && [[ "$TEST_CMD" == "pytest" ]]; then
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] && [[ "$TEST_CMD" == pytest* ]]; then
       pip install coveralls; fi
   - if [[ $TEST_CMD == black* ]]; then pip install black; fi
   - if [[ $TEST_CMD == flake8* ]]; then pip install flake8 flake8-bugbear
       flake8-docstrings flake8-todo flake8-eradicate; fi
   - pip install -r requirements.txt
+  - pip install -r requirements-tests.txt
 
 env:
-- TEST_CMD="pytest"
+- TEST_CMD="pytest --vcr-record=none"
 
 script:
 - $TEST_CMD
