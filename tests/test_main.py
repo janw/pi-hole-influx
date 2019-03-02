@@ -42,7 +42,7 @@ def test_main(mocker):
 
 @pytest.mark.vcr()
 def test_main_instance_name(mocker):
-    """Test main function executed when running the daemon."""
+    """Test main function executed, configured with instanec_name."""
     mock_config = mocker.patch(
         "builtins.open", return_value=io.StringIO(CONFIG_FILE_CONTENT_INSTANCE_NAME)
     )
@@ -55,7 +55,7 @@ def test_main_instance_name(mocker):
 
 @pytest.mark.vcr()
 def test_main_exception(mocker):
-    """Test main function executed when running the daemon."""
+    """Test main function, failing with exceptino inside of loop."""
     mock_config = mocker.patch(
         "builtins.open", return_value=io.StringIO(CONFIG_FILE_CONTENT)
     )

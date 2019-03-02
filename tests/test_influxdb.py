@@ -2,6 +2,7 @@ from piholeinflux import send_msg
 
 
 def test_send_msg(mocker):
+    """Test send_msg function, sending data to influxDB."""
     indata = {"some": "value", "gravity_last_updated": "should be gone"}
     expected = [
         {
