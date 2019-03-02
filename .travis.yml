@@ -20,7 +20,7 @@ script:
 - $TEST_CMD
 
 after_success:
- - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] && [[ "$TEST_CMD" == "pytest" ]];
+ - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] && [[ "$TEST_CMD" == pytest* ]];
      then coveralls; fi
 
 matrix:
