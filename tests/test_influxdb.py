@@ -18,6 +18,7 @@ def test_send_msg(mocker):
     mock_influx().write_points.assert_called_with(expected)
     assert mock_influx().write_points.call_count == 1
 
+
 def test_send_msg_integer(mocker):
     """Test proper conversion of ads_percentage_today to float."""
 
