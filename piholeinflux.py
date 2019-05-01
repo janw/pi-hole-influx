@@ -5,14 +5,11 @@ import requests
 from time import sleep, localtime, strftime
 from influxdb import InfluxDBClient
 from configparser import ConfigParser
-<<<<<<< HEAD
 from os import path
 from urllib.parse import urlparse
 from shutil import copyfile
-=======
 from os import path, environ
 from urllib.parse import urlparse, splitport, splituser, splitpasswd
->>>>>>> Major refactor, better env var handling
 import traceback
 import sdnotify
 import sys
