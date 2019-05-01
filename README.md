@@ -17,26 +17,29 @@ To use docker for running the daemon, use the following command:
 
 ```bash
 docker run \
--e DATABASE_URL="influxdb://pihole:mysecretpassword@hostname" \
--e PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php" \
-janw/pi-hole-influx
+  -e PIHOLE_INFLUXDB_HOST="myhostname" \
+  -e PIHOLE_INFLUXDB_PORT="8086" \
+  -e PIHOLE_INFLUXDB_USERNAME="myusername" \
+  -e PIHOLE_INFLUXDB_PASSWORD="mysupersecretpassword" \
+  -e PIHOLE_INFLUXDB_DATABASE="pihole" \
+  -e PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php" \
+  janwh/pi-hole-influx
 ```
 
-Note, that the `DATABASE_URL` variable contains the InfluxDB connection details in popular URL format inspired by [SQLAlchemy](https://docs.sqlalchemy.org/en/latest/core/engines.html), i.e.
+The following values are the defaults and will be used if not set:
+
+* PIHOLE_INFLUXDB_PORT="8086"
+* PIHOLE_INFLUXDB_HOST="127.0.0.1"
+* PIHOLE_INFLUXDB_DATABASE="pihole"
+* PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php"
+
+`PIHOLE_INSTANCES` contains the Pi-hole instances that are to be reported. Multiple instances can given in a dict-like boxed syntax, known as [Inline Tables in TOML](https://github.com/toml-lang/toml#inline-table):
 
 ```bash
-DATABASE_URL="influxdb://<username>:<password>@<hostname>[:<port]>[/<database>]"
+PIHOLE_INSTANCES="{first_one="http://127.0.0.1/admin/api.php",second_pihole="http://192.168.42.79/admin/api.php"[,…]}"
 ```
 
-If port and database are not given, they default to `8086`, and `pihole`, respectively.
-
-`PIHOLE_INSTANCES` contains the Pi-hole instances that are to be reported. Multiple instances can be seperated by comma:
-
-```bash
-PIHOLE_INSTANCES="[<name>=]http://127.0.0.1/admin/api.php,[<second_name>=]http://192.168.42.79/admin/api.php[,…]"
-```
-
-Note that instances can be prefixed by a custom name, separated by an equal sign.
+Note that instances are prefixed by a custom name.
 
 
 ## Setup (Traditional Way)
@@ -60,8 +63,8 @@ cd ~/pi-hole-influx
 pip3 install -r requirements.txt
 
 # Copy config.example and modify it (should be self-explanatory)
-cp config.ini.example config.ini
-vi config.ini
+cp user.toml.example user.toml
+vi user.toml
 ```
 
 Before starting the daemon for the first time, symlink the systemd service into place, reload, and enable the service.
@@ -95,16 +98,6 @@ The status should look as follows. Note the `Status:` line showing the last time
 ## Set up a Grafana Dashboard
 
 The example dashboard seen [at the top](#pi-hole-influx) uses the collected data and displays it in concise and sensible graphs and single stats. The dashboard can be imported into your Grafana instance from the `dashboard.json` file included in the repo, or by using ID `6603` to [import it from Grafana's Dashboard Directory](https://grafana.com/dashboards/6603).
-
-## Monitoring multiple Pi-holes
-
-As shown in the example configuration, it is possibe to add more than one Pi-hole instance to be monitored. Simply add more instances to the `[pihole]`, using a different name for the instance as a config entry, like so:
-
-```ini
-[pihole]
-pihole = http://127.0.0.1/admin/api.php
-second_pihole = http://192.168.27.42/admin/api.php
-```
 
 ## Attributions
 

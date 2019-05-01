@@ -1,4 +1,4 @@
-from piholeinflux import send_msg
+from piholeinflux import Daemon
 
 
 def test_send_msg(mocker):
@@ -11,9 +11,9 @@ def test_send_msg(mocker):
             "fields": {"some": "value", "ads_percentage_today": 0.0},
         }
     ]
-    mock_influx = mocker.patch("influxdb.InfluxDBClient")
-
-    send_msg(mock_influx(), indata, "myname")
+    mock_influx = mocker.patch("piholeinflux.InfluxDBClient")
+    d = Daemon()
+    d.send_msg(indata, "myname")
 
     mock_influx().write_points.assert_called_once_with(expected)
 
@@ -37,8 +37,8 @@ def test_send_msg_integer(mocker):
             "fields": {"ads_percentage_today": IsOfType(float)},
         }
     ]
-    mock_influx = mocker.patch("influxdb.InfluxDBClient")
-
-    send_msg(mock_influx(), indata, "myname")
+    mock_influx = mocker.patch("piholeinflux.InfluxDBClient")
+    d = Daemon()
+    d.send_msg(indata, "myname")
 
     mock_influx().write_points.assert_called_once_with(expected)

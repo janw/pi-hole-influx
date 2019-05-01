@@ -1,80 +1,26 @@
-#! /usr/bin/python
+#! /usr/bin/env python3
 
-from __future__ import print_function
 import requests
 from time import sleep, localtime, strftime
 from influxdb import InfluxDBClient
-from configparser import ConfigParser
-from os import path
-from urllib.parse import urlparse
-from shutil import copyfile
-from os import path, environ
-from urllib.parse import urlparse, splitport, splituser, splitpasswd
-import traceback
 import sdnotify
 import sys
 import logging
 
-HERE = path.dirname(path.realpath(__file__))
-CONFIG_FILE = path.join(HERE, "config.ini")
+from dynaconf import LazySettings, Validator
+from dynaconf.utils.boxing import DynaBox
 
+settings = LazySettings(
+    SETTINGS_FILE_FOR_DYNACONF="default.toml,user.toml",
+    ENVVAR_PREFIX_FOR_DYNACONF="PIHOLE",
+)
+settings.validators.register(Validator("INSTANCES", must_exist=True))
+settings.validators.validate()
 
 n = sdnotify.SystemdNotifier()
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: [%(name)s] %(message)s")
 
-
-class Config(ConfigParser):
-    logger = logging.getLogger(__name__)
-
-    def apply_environ(self):
-        url = environ.get("DATABASE_URL")
-        self._apply_database_url(url)
-
-        instances = environ.get("PIHOLE_INSTANCES")
-        self._apply_pihole_instances(instances)
-
-    def _apply_database_url(self, url):
-        if not url:
-            return
-
-        self.logger.debug("Applying database parameters from url: %s", url)
-        parts = urlparse(url)
-        if parts.scheme != "influxdb":
-            return
-
-        database = "pihole" if parts.path == "/" else parts.path.strip("/")
-        hostname, port = splitport(parts.netloc)
-        username, hostname = splituser(hostname)
-        username, password = splitpasswd(username)
-
-        if "influxdb" not in self:
-            self.add_section("influxdb")
-        self["influxdb"]["port"] = port if port else 8086
-        self["influxdb"]["database"] = database
-        self["influxdb"]["hostname"] = hostname
-        self["influxdb"]["username"] = username
-        self["influxdb"]["password"] = password
-
-    def _apply_pihole_instances(self, piholes):
-        if not piholes:
-            return
-
-        self.logger.debug("Applying pihole instances: %s", piholes)
-        if "pihole" not in self:
-            self.add_section("pihole")
-
-        instances = piholes.split(",")
-        for inst in instances:
-            splits = inst.split("=")
-            if len(splits) == 1:
-                self["pihole"][urlparse(inst).netloc] = inst
-            else:
-                self["pihole"][splits[0]] = splits[1]
-
-
-config = Config()
-config.read(CONFIG_FILE)
-config.apply_environ()
+logger = logging.getLogger(__name__)
 
 
 class Pihole:
@@ -83,7 +29,7 @@ class Pihole:
     def __init__(self, name, url):
         self.name = name
         self.url = url
-        self.timeout = config["defaults"].getint("request_timeout", 10)
+        self.timeout = settings.as_int("REQUEST_TIMEOUT")
         self.logger = logging.getLogger(__name__ + name)
         self.logger.debug("Initialized for %s", name, url)
 
@@ -92,7 +38,7 @@ class Pihole:
         response = requests.get(self.url, timeout=self.timeout)
         if response.status_code == 200:
             self.logger.debug("Got %d bytes", len(response.content))
-            return response
+            return response.json()
         else:
             self.logger.error(
                 "Got unexpected response %d, %s", response.status_code, response.content
@@ -100,19 +46,32 @@ class Pihole:
 
 
 class Daemon(object):
-    logger = logging.getLogger(__name__)
-
-    def __init__(self, config):
+    def __init__(self, single_run=False):
         self.influx = InfluxDBClient(
-            host=config["influxdb"].get("hostname", "127.0.0.1"),
-            port=config["influxdb"].getint("port", 8086),
-            username=config["influxdb"]["username"],
-            password=config["influxdb"]["password"],
-            database=config["influxdb"]["database"],
+            host=settings.INFLUXDB_HOST,
+            port=settings.as_int("INFLUXDB_PORT"),
+            username=settings.get("INFLUXDB_USERNAME"),
+            password=settings.get("INFLUXDB_PASSWORD"),
+            database=settings.INFLUXDB_DATABASE,
         )
+        self.single_run = single_run
 
-        self.piholes = [Pihole(name, url) for name, url in config["pihole"].items()]
-        self.interval = config["defaults"].getint("reporting_interval", 30)
+        if isinstance(settings.INSTANCES, DynaBox):
+            self.piholes = [
+                Pihole(name, url) for name, url in settings.INSTANCES.items()
+            ]
+        elif isinstance(settings.INSTANCES, list):
+            self.piholes = [
+                Pihole("pihole" + str(n + 1), url)
+                for n, url in enumerate(settings.INSTANCES)
+            ]
+        elif "=" in settings.INSTANCES:
+            name, url = settings.INSTANCES.split("=", maxsplit=1)
+            self.piholes = [Pihole(name, url)]
+        elif isinstance(settings.INSTANCES, str):
+            self.piholes = [Pihole("pihole", settings.INSTANCES)]
+        else:
+            raise ValueError("Unable to parse instances definition(s).")
 
     def run(self):
         while True:
@@ -123,29 +82,33 @@ class Daemon(object):
 
             n.notify("STATUS=Last report to InfluxDB at {}".format(timestamp))
             n.notify("READY=1")
-            sleep(self.interval)
+            if self.single_run:
+                break
+            sleep(settings.as_int("REPORTING_INTERVAL"))  # pragma: no cover
 
     def send_msg(self, resp, name):
         if "gravity_last_updated" in resp:
             del resp["gravity_last_updated"]
+
+        # Monkey-patch ads-% to be always float (type not enforced at API level)
+        resp["ads_percentage_today"] = float(resp.get("ads_percentage_today", 0.0))
 
         json_body = [{"measurement": "pihole", "tags": {"host": name}, "fields": resp}]
 
         self.influx.write_points(json_body)
 
 
-if __name__ == "__main__":
-    if "pihole" not in config or len(config["pihole"]) < 1:
-        print("Missing Pi-hole configuration")
-        sys.exit(1)
-
-    daemon = Daemon(config)
+def main(single_run=False):
+    daemon = Daemon(single_run)
 
     try:
         daemon.run()
     except KeyboardInterrupt:
-        sys.exit(0)
-    except Exception as e:
-        print(str(e))
-        print(traceback.format_exc())
+        sys.exit(0)  # pragma: no cover
+    except Exception:
+        logger.exception("Unexpected exception", exc_info=True)
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
