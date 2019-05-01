@@ -23,7 +23,7 @@ docker run \
   -e PIHOLE_INFLUXDB_PASSWORD="mysupersecretpassword" \
   -e PIHOLE_INFLUXDB_DATABASE="pihole" \
   -e PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php" \
-  janwh/pi-hole-influx
+  registry.gitlab.com/janw/pi-hole-influx
 ```
 
 The following values are the defaults and will be used if not set:
