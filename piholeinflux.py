@@ -1,99 +1,113 @@
-#! /usr/bin/python
+#! /usr/bin/env python3
 
-from __future__ import print_function
 import requests
 from time import sleep, localtime, strftime
 from influxdb import InfluxDBClient
-from configparser import ConfigParser
-from os import path
-from urllib.parse import urlparse
-import traceback
 import sdnotify
 import sys
+import logging
 
-HERE = path.dirname(path.realpath(__file__))
+from dynaconf import LazySettings, Validator
+from dynaconf.utils.boxing import DynaBox
+
+settings = LazySettings(
+    SETTINGS_FILE_FOR_DYNACONF="default.toml,user.toml",
+    ENVVAR_PREFIX_FOR_DYNACONF="PIHOLE",
+)
+settings.validators.register(Validator("INSTANCES", must_exist=True))
+settings.validators.validate()
 
 n = sdnotify.SystemdNotifier()
-n.notify("READY=1")
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: [%(name)s] %(message)s")
+
+logger = logging.getLogger(__name__)
 
 
 class Pihole:
     """Container object for a single Pi-hole instance."""
 
-    def __init__(self, config):
-        self.url = config["api_location"]
-        self.timeout = int(config.get("timeout", 10))
-        if "instance_name" in config:
-            self.name = config["instance_name"]
-        elif hasattr(config, "name"):
-            self.name = config.name
-        else:
-            self.name = urlparse(self.url).netloc
+    def __init__(self, name, url):
+        self.name = name
+        self.url = url
+        self.timeout = settings.as_int("REQUEST_TIMEOUT")
+        self.logger = logging.getLogger(__name__ + name)
+        self.logger.debug("Initialized for %s", name, url)
 
     def get_data(self):
         """Retrieve API data from Pi-hole, and return as dict on success."""
         response = requests.get(self.url, timeout=self.timeout)
         if response.status_code == 200:
+            self.logger.debug("Got %d bytes", len(response.content))
             return response.json()
+        else:
+            self.logger.error(
+                "Got unexpected response %d, %s", response.status_code, response.content
+            )
 
 
-def send_msg(influxdb, resp, name):
-    """Write the Pi-hole response data to the InfluxDB."""
-    if "gravity_last_updated" in resp:
-        del resp["gravity_last_updated"]
+class Daemon(object):
+    def __init__(self, single_run=False):
+        self.influx = InfluxDBClient(
+            host=settings.INFLUXDB_HOST,
+            port=settings.as_int("INFLUXDB_PORT"),
+            username=settings.get("INFLUXDB_USERNAME"),
+            password=settings.get("INFLUXDB_PASSWORD"),
+            database=settings.INFLUXDB_DATABASE,
+        )
+        self.single_run = single_run
 
-    # Monkey-patch ads-% to be always float (type not enforced at API level)
-    resp["ads_percentage_today"] = float(resp.get("ads_percentage_today", 0.0))
+        if isinstance(settings.INSTANCES, DynaBox):
+            self.piholes = [
+                Pihole(name, url) for name, url in settings.INSTANCES.items()
+            ]
+        elif isinstance(settings.INSTANCES, list):
+            self.piholes = [
+                Pihole("pihole" + str(n + 1), url)
+                for n, url in enumerate(settings.INSTANCES)
+            ]
+        elif "=" in settings.INSTANCES:
+            name, url = settings.INSTANCES.split("=", maxsplit=1)
+            self.piholes = [Pihole(name, url)]
+        elif isinstance(settings.INSTANCES, str):
+            self.piholes = [Pihole("pihole", settings.INSTANCES)]
+        else:
+            raise ValueError("Unable to parse instances definition(s).")
 
-    json_body = [{"measurement": "pihole", "tags": {"host": name}, "fields": resp}]
+    def run(self):
+        while True:
+            for pi in self.piholes:
+                data = pi.get_data()
+                self.send_msg(data, pi.name)
+            timestamp = strftime("%Y-%m-%d %H:%M:%S %z", localtime())
 
-    influxdb.write_points(json_body)
+            n.notify("STATUS=Last report to InfluxDB at {}".format(timestamp))
+            n.notify("READY=1")
+            if self.single_run:
+                break
+            sleep(settings.as_int("REPORTING_INTERVAL"))  # pragma: no cover
+
+    def send_msg(self, resp, name):
+        if "gravity_last_updated" in resp:
+            del resp["gravity_last_updated"]
+
+        # Monkey-patch ads-% to be always float (type not enforced at API level)
+        resp["ads_percentage_today"] = float(resp.get("ads_percentage_today", 0.0))
+
+        json_body = [{"measurement": "pihole", "tags": {"host": name}, "fields": resp}]
+
+        self.influx.write_points(json_body)
 
 
 def main(single_run=False):
-    """Main application daemon."""
-    config = ConfigParser()
-    config.read_file(open(path.join(HERE, "config.ini")))
+    daemon = Daemon(single_run)
 
-    influxdb_server = config["influxdb"].get("hostname", "127.0.0.1")
-    influxdb_port = config["influxdb"].getint("port", 8086)
-    influxdb_username = config["influxdb"]["username"]
-    influxdb_password = config["influxdb"]["password"]
-    influxdb_database = config["influxdb"]["database"]
-    reporting_interval = config["influxdb"].getint("reporting_interval", 10)
-
-    influxdb_client = InfluxDBClient(
-        influxdb_server,
-        influxdb_port,
-        influxdb_username,
-        influxdb_password,
-        influxdb_database,
-    )
-    piholes = [
-        Pihole(config[section])
-        for section in config.sections()
-        if section not in ("influxdb", "defaults")
-    ]
-
-    while True:
-        try:
-            for pi in piholes:
-                data = pi.get_data()
-                send_msg(influxdb_client, data, pi.name)
-            timestamp = strftime("%Y-%m-%d %H:%M:%S %z", localtime())
-            n.notify("STATUS=Reported to InfluxDB at {}".format(timestamp))
-
-        except Exception as e:
-            msg = "Failed, to report to InfluxDB:"
-            n.notify("STATUS={} {}".format(msg, str(e)))
-            print(msg, str(e))
-            print(traceback.format_exc())
-            sys.exit(1)
-
-        if single_run:
-            break
-        else:
-            sleep(reporting_interval)  # pragma: no cover
+    try:
+        daemon.run()
+    except KeyboardInterrupt:
+        sys.exit(0)  # pragma: no cover
+    except Exception:
+        logger.exception("Unexpected exception", exc_info=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

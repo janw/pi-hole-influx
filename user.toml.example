@@ -1,0 +1,14 @@
+[global]
+
+# influxdb_host =
+# influxdb_port =
+# influxdb_database =
+# influxdb_username =
+# influxdb_password =
+
+# request_timeout = 10
+# reporting_interval = 30
+
+# instances="localhost=http://127.0.0.1/admin/api.php"
+# instances={pihole="http://10.10.0.10/admin/api.php", second instance="http://192.168.0.1/admin/api.php"}
+# instances=["http://10.10.0.10/admin/api.php", "http://192.168.0.1/admin/api.php"]

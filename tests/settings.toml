@@ -1,0 +1,12 @@
+[testing]
+
+request_timeout = "10"
+reporting_interval = "30"
+
+influxdb_port = "8086"
+influxdb_hostname = "10.10.10.1"
+influxdb_username = "pihole"
+influxdb_password = "allthosesweetumstatistics"
+influxdb_database = "pihole"
+
+instances="http://127.0.0.1:8080/admin/api.php"

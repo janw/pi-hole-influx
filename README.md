@@ -7,9 +7,42 @@
 
 A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be displayed via Grafana.
 
+**Heads-up: the configuration options changed fundamentally in recent versions. Please read up on the current state below.**
+
 ![Example Grafana Dashboard](.readme-assets/dashboard.png)
 
-## Requirements and Setup
+## Setup (Using Docker)
+
+To use docker for running the daemon, use the following command:
+
+```bash
+docker run \
+  -e PIHOLE_INFLUXDB_HOST="myhostname" \
+  -e PIHOLE_INFLUXDB_PORT="8086" \
+  -e PIHOLE_INFLUXDB_USERNAME="myusername" \
+  -e PIHOLE_INFLUXDB_PASSWORD="mysupersecretpassword" \
+  -e PIHOLE_INFLUXDB_DATABASE="pihole" \
+  -e PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php" \
+  registry.gitlab.com/janw/pi-hole-influx
+```
+
+The following values are the defaults and will be used if not set:
+
+* PIHOLE_INFLUXDB_PORT="8086"
+* PIHOLE_INFLUXDB_HOST="127.0.0.1"
+* PIHOLE_INFLUXDB_DATABASE="pihole"
+* PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php"
+
+`PIHOLE_INSTANCES` contains the Pi-hole instances that are to be reported. Multiple instances can given in a dict-like boxed syntax, known as [Inline Tables in TOML](https://github.com/toml-lang/toml#inline-table):
+
+```bash
+PIHOLE_INSTANCES="{first_one="http://127.0.0.1/admin/api.php",second_pihole="http://192.168.42.79/admin/api.php"[,…]}"
+```
+
+Note that instances are prefixed by a custom name.
+
+
+## Setup (Traditional Way)
 
 As Pi-hole (as the name suggests) is built specifically with the Raspberry Pi in mind (and I run it on there as well), the following steps assume an instance of Pi-hole on Raspbian Strech Lite, with no additional modifications so far. Piholestatus will be configured to run on the same Pi.
 
@@ -30,8 +63,8 @@ cd ~/pi-hole-influx
 pip3 install -r requirements.txt
 
 # Copy config.example and modify it (should be self-explanatory)
-cp config.ini.example config.ini
-vi config.ini
+cp user.toml.example user.toml
+vi user.toml
 ```
 
 Before starting the daemon for the first time, symlink the systemd service into place, reload, and enable the service.
@@ -65,24 +98,6 @@ The status should look as follows. Note the `Status:` line showing the last time
 ## Set up a Grafana Dashboard
 
 The example dashboard seen [at the top](#pi-hole-influx) uses the collected data and displays it in concise and sensible graphs and single stats. The dashboard can be imported into your Grafana instance from the `dashboard.json` file included in the repo, or by using ID `6603` to [import it from Grafana's Dashboard Directory](https://grafana.com/dashboards/6603).
-
-## Monitoring multiple Pi-holes
-
-As shown in the example configuration, it is possibe to add more than one Pi-hole instance to be monitored. Simply duplicate the `[pihole]` section and its config entries, and rename it to another unique name, like so:
-
-```ini
-[pihole]
-api_location = http://127.0.0.1/admin/api.php
-instance_name = pihole
-timeout = 10
-
-[pihole_2]
-api_location = http://192.168.27.42/admin/api.php
-instance_name = second_pihole
-timeout = 10
-```
-
-The config entries for `instance_name`, and `timeout` are optional; the instance name defaults to the config section name (`pihole_2` in this case), the connection timeout will be 10 seconds by default.
 
 ## Attributions
 
