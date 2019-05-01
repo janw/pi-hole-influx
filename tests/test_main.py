@@ -9,7 +9,8 @@ def test_main(mocker):
 
     main(single_run=True)
 
-    mock_influx.assert_called_once()
+    assert mock_influx.called
+    assert mock_influx.call_count == 1
 
 
 @pytest.mark.vcr()
@@ -24,5 +25,6 @@ def test_main_exception(mocker):
         main(single_run=True)
 
     assert ctx.value.code == 1
-    mock_get_data.assert_called_once_with()
-    mock_influx.assert_called_once()
+    mock_get_data.assert_called_with()
+    assert mock_influx.called
+    assert mock_influx.call_count == 1

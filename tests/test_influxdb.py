@@ -15,8 +15,8 @@ def test_send_msg(mocker):
     d = Daemon()
     d.send_msg(indata, "myname")
 
-    mock_influx().write_points.assert_called_once_with(expected)
-
+    mock_influx().write_points.assert_called_with(expected)
+    assert mock_influx().write_points.call_count == 1
 
 def test_send_msg_integer(mocker):
     """Test proper conversion of ads_percentage_today to float."""
@@ -41,4 +41,5 @@ def test_send_msg_integer(mocker):
     d = Daemon()
     d.send_msg(indata, "myname")
 
-    mock_influx().write_points.assert_called_once_with(expected)
+    mock_influx().write_points.assert_called_with(expected)
+    assert mock_influx().write_points.call_count == 1
