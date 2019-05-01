@@ -1,12 +1,14 @@
 FROM python:3.6-alpine
 
-LABEL maintainer="mail@janwillhaus.de"
+LABEL maintainer="Jan Willhaus <mail@janwillhaus.de>"
 
-WORKDIR /
+WORKDIR /app
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY piholeinflux.py config.ini.example ./
+COPY user.toml.example ./user.toml
+COPY default.toml ./
+COPY piholeinflux.py ./
 
 CMD [ "python", "./piholeinflux.py" ]
