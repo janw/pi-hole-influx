@@ -18,7 +18,6 @@ settings.validators.register(Validator("INSTANCES", must_exist=True))
 settings.validators.validate()
 
 n = sdnotify.SystemdNotifier()
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: [%(name)s] %(message)s")
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +29,8 @@ class Pihole:
         self.name = name
         self.url = url
         self.timeout = settings.as_int("REQUEST_TIMEOUT")
-        self.logger = logging.getLogger(__name__ + name)
-        self.logger.debug("Initialized for %s", name, url)
+        self.logger = logging.getLogger("pihole." + name)
+        self.logger.info("Initialized for %s (%s)", name, url)
 
     def get_data(self):
         """Retrieve API data from Pi-hole, and return as dict on success."""
@@ -74,6 +73,7 @@ class Daemon(object):
             raise ValueError("Unable to parse instances definition(s).")
 
     def run(self):
+        logger.info("Running daemon, reporting to InfluxDB at %s.", self.influx._host)
         while True:
             for pi in self.piholes:
                 data = pi.get_data()
@@ -83,6 +83,7 @@ class Daemon(object):
             n.notify("STATUS=Last report to InfluxDB at {}".format(timestamp))
             n.notify("READY=1")
             if self.single_run:
+                logger.info("Finished single run.")
                 break
             sleep(settings.as_int("REPORTING_INTERVAL"))  # pragma: no cover
 
@@ -99,6 +100,9 @@ class Daemon(object):
 
 
 def main(single_run=False):
+    log_level = (settings.LOG_LEVEL).upper()
+    logging.basicConfig(level=getattr(logging, log_level), format="%(levelname)s: [%(name)s] %(message)s")
+
     daemon = Daemon(single_run)
 
     try:
