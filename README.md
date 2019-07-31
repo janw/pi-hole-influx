@@ -34,7 +34,7 @@ A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be d
     -e PIHOLE_INFLUXDB_USERNAME="myusername" \
     -e PIHOLE_INFLUXDB_PASSWORD="mysupersecretpassword" \
     --network host \
-    registry.gitlab.com/janw/pi-hole-influx
+    registry.gitlab.com/janw/pi-hole-influx:armv7
   ```
 
 The following values are the defaults and will be used if not set:
