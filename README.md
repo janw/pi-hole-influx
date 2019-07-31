@@ -52,6 +52,26 @@ PIHOLE_INSTANCES="{first_one="http://127.0.0.1/admin/api.php",second_pihole="htt
 
 Note that instances are prefixed by a custom name.
 
+## Docker-compose example
+
+If you want to run the daemon through Docker-compose, you might appreciate the configuration example below.
+
+```yaml
+  piholeinflux:
+    container_name: piholeinflux
+    image: registry.gitlab.com/janw/pi-hole-influx
+    restart: always
+    environment:
+      PIHOLE_INFLUXDB_HOST: "influxdb"
+      PIHOLE_INFLUXDB_PORT: "8086"
+      PIHOLE_INFLUXDB_USERNAME: "pihole"
+      PIHOLE_INFLUXDB_PASSWORD: "mysupersecretpassword"
+      PIHOLE_INFLUXDB_DATABASE: "pihole"
+      PIHOLE_INSTANCES: "pihole=http://10.10.0.10/admin/api.php"
+    volumes:
+      - ./instead/of/environment/you/can/config.toml:/user.toml
+
+```
 
 ## Setup (Traditional Way)
 
