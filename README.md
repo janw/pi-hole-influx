@@ -13,25 +13,36 @@ A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be d
 
 ## Setup (Using Docker)
 
-To use docker for running the daemon, use the following command:
+* To use docker for running the daemon, use the following command:
 
-```bash
-docker run \
-  -e PIHOLE_INFLUXDB_HOST="myhostname" \
-  -e PIHOLE_INFLUXDB_PORT="8086" \
-  -e PIHOLE_INFLUXDB_USERNAME="myusername" \
-  -e PIHOLE_INFLUXDB_PASSWORD="mysupersecretpassword" \
-  -e PIHOLE_INFLUXDB_DATABASE="pihole" \
-  -e PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php" \
-  registry.gitlab.com/janw/pi-hole-influx
-```
+  ```bash
+  docker run \
+    -e PIHOLE_INFLUXDB_HOST="myhostname" \
+    -e PIHOLE_INFLUXDB_PORT="8086" \
+    -e PIHOLE_INFLUXDB_USERNAME="myusername" \
+    -e PIHOLE_INFLUXDB_PASSWORD="mysupersecretpassword" \
+    -e PIHOLE_INFLUXDB_DATABASE="pihole" \
+    -e PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php" \
+    registry.gitlab.com/janw/pi-hole-influx
+  ```
+
+* For running it on a Raspberry Pi (arm v7 arch), use the dedicated `armv7` image tag:
+
+  ```bash
+  docker run \
+    -e PIHOLE_INFLUXDB_HOST="myhostname" \
+    -e PIHOLE_INFLUXDB_USERNAME="myusername" \
+    -e PIHOLE_INFLUXDB_PASSWORD="mysupersecretpassword" \
+    --network host \
+    registry.gitlab.com/janw/pi-hole-influx
+  ```
 
 The following values are the defaults and will be used if not set:
 
-* PIHOLE_INFLUXDB_PORT="8086"
-* PIHOLE_INFLUXDB_HOST="127.0.0.1"
-* PIHOLE_INFLUXDB_DATABASE="pihole"
-* PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php"
+* `PIHOLE_INFLUXDB_PORT="8086"`
+* `PIHOLE_INFLUXDB_HOST="127.0.0.1"`
+* `PIHOLE_INFLUXDB_DATABASE="pihole"`
+* `PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php"`
 
 `PIHOLE_INSTANCES` contains the Pi-hole instances that are to be reported. Multiple instances can given in a dict-like boxed syntax, known as [Inline Tables in TOML](https://github.com/toml-lang/toml#inline-table):
 

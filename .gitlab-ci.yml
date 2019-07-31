@@ -6,6 +6,7 @@ services:
 variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
 
 stages:
   - build
@@ -19,7 +20,6 @@ build:
   script:
     - docker pull $CI_REGISTRY_IMAGE:latest || true
     - docker build
-      --cache-from $CI_REGISTRY_IMAGE:latest
       --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
 
@@ -29,6 +29,34 @@ tag latest:
     - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
     - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:latest
-
   only:
     - master
+
+## Aditional build jobs for special-flavor Dockerfiles
+## ----
+
+.build special:
+  stage: build
+  variables:
+    BUILD_DOCKERFILE: Dockerfile
+  script:
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    - docker pull $CI_REGISTRY_IMAGE:$IMAGE_FLAVOR || true
+    - docker build
+      --build-arg BUILD_FROM=${BUILD_FROM}
+      --tag $CI_REGISTRY_IMAGE:${IMAGE_FLAVOR}-$CI_COMMIT_SHORT_SHA
+      --file ${BUILD_DOCKERFILE} .
+    - docker run --rm $CI_REGISTRY_IMAGE:${IMAGE_FLAVOR}-$CI_COMMIT_SHORT_SHA uname -m
+    - docker push $CI_REGISTRY_IMAGE:${IMAGE_FLAVOR}-$CI_COMMIT_SHORT_SHA
+
+.tag special:
+  stage: tag
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:${IMAGE_FLAVOR}-$CI_COMMIT_SHORT_SHA
+    - docker tag $CI_REGISTRY_IMAGE:${IMAGE_FLAVOR}-$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE:${IMAGE_FLAVOR}
+    - docker push $CI_REGISTRY_IMAGE:${IMAGE_FLAVOR}
+  only:
+    - master
+
+build armv7:  {extends: .build special, variables: {IMAGE_FLAVOR: armv7, BUILD_FROM: "arm32v7/python:3.6-alpine"}}
+tag armv7:    {extends: .tag special,   variables: {IMAGE_FLAVOR: armv7}}
