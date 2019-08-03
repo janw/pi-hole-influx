@@ -101,7 +101,10 @@ class Daemon(object):
 
 def main(single_run=False):
     log_level = (settings.LOG_LEVEL).upper()
-    logging.basicConfig(level=getattr(logging, log_level), format="%(levelname)s: [%(name)s] %(message)s")
+    logging.basicConfig(
+        level=getattr(logging, log_level),
+        format="%(levelname)s: [%(name)s] %(message)s",
+    )
 
     daemon = Daemon(single_run)
 
