@@ -57,20 +57,28 @@ Note that instances are prefixed by a custom name.
 If you want to run the daemon through Docker-compose, you might appreciate the configuration example below.
 
 ```yaml
+version: "2"
+services:
   piholeinflux:
-    container_name: piholeinflux
     image: registry.gitlab.com/janw/pi-hole-influx
-    restart: always
+    container_name: piholeinflux
+    restart: unless-stopped
     environment:
-      PIHOLE_INFLUXDB_HOST: "influxdb"
+
+      # Replace details with your InfluxDB's hostname and credentials
+      PIHOLE_INFLUXDB_HOST: "10.10.10.1"
       PIHOLE_INFLUXDB_PORT: "8086"
       PIHOLE_INFLUXDB_USERNAME: "pihole"
-      PIHOLE_INFLUXDB_PASSWORD: "mysupersecretpassword"
+      PIHOLE_INFLUXDB_PASSWORD: "pihole"
       PIHOLE_INFLUXDB_DATABASE: "pihole"
-      PIHOLE_INSTANCES: "pihole=http://10.10.0.10/admin/api.php"
-    volumes:
-      - ./instead/of/environment/you/can/config.toml:/user.toml
 
+      # Replace with your Pi-Hole's address including path to API below
+      PIHOLE_INSTANCES: "pihole=http://10.10.0.10/admin/api.php"
+
+    # OPTIONAL: Instead of the aobove environment variables,
+    #           use a custom copy of the user.toml config file.
+    volumes:
+      - ./custom/config.toml:/user.toml
 ```
 
 ## Setup (Traditional Way)
