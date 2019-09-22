@@ -4,6 +4,8 @@ log_level = "info"
 influxdb_host = "127.0.0.1"
 influxdb_port = "8086"
 influxdb_database = "pihole"
+influxdb_ssl = "False"
+influxdb_verify_ssl = "True"
 
 request_timeout = 10
 reporting_interval = 30
