@@ -52,6 +52,8 @@ class Daemon(object):
             username=settings.get("INFLUXDB_USERNAME"),
             password=settings.get("INFLUXDB_PASSWORD"),
             database=settings.INFLUXDB_DATABASE,
+            ssl=settings.as_bool("INFLUXDB_SSL"),
+            verify_ssl=settings.as_bool("INFLUXDB_VERIFY_SSL"),
         )
         self.single_run = single_run
 
