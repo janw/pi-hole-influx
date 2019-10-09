@@ -11,7 +11,7 @@ RUN apk add --no-cache tini && \
 
 COPY user.toml.example ./user.toml
 COPY default.toml ./
-COPY piholeinflux.py ./
+COPY piholeinflux ./piholeinflux
 
 ENTRYPOINT [ "tini", "--" ]
-CMD [ "python", "./piholeinflux.py" ]
+CMD [ "python", "-m", "piholeinflux" ]
