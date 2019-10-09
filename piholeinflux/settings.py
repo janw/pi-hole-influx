@@ -1,5 +1,4 @@
 from dynaconf import LazySettings, Validator
-from dynaconf.utils.boxing import DynaBox
 
 settings = LazySettings(
     SETTINGS_FILE_FOR_DYNACONF="default.toml,user.toml",
