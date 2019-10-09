@@ -98,7 +98,7 @@ tag latest:
     - master
 
 build armv7:
-  extends: .build special,
+  extends: .build special
   variables: { IMAGE_FLAVOR: armv7, BUILD_FROM: "arm32v7/python:3.6-alpine" }
 
 tag armv7:
