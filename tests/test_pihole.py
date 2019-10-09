@@ -1,4 +1,5 @@
 import pytest
+
 from piholeinflux.pihole import Pihole
 
 

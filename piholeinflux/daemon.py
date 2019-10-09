@@ -1,9 +1,11 @@
 import logging
-from time import sleep, localtime, strftime
-from influxdb import InfluxDBClient
+from time import localtime
+from time import sleep
+from time import strftime
 
-from dynaconf.utils.boxing import DynaBox
 import sdnotify
+from dynaconf.utils.boxing import DynaBox
+from influxdb import InfluxDBClient
 
 from piholeinflux.pihole import Pihole
 from piholeinflux.settings import settings

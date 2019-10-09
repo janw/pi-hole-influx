@@ -1,4 +1,5 @@
-from dynaconf import LazySettings, Validator
+from dynaconf import LazySettings
+from dynaconf import Validator
 
 settings = LazySettings(
     SETTINGS_FILE_FOR_DYNACONF="default.toml,user.toml",
