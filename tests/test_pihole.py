@@ -1,5 +1,5 @@
 import pytest
-from piholeinflux import Pihole
+from piholeinflux.pihole import Pihole
 
 
 def test_pihole_init():

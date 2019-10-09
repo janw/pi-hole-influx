@@ -1,47 +1,15 @@
-#! /usr/bin/env python3
-
-import requests
+import logging
 from time import sleep, localtime, strftime
 from influxdb import InfluxDBClient
-import sdnotify
-import sys
-import logging
 
-from dynaconf import LazySettings, Validator
 from dynaconf.utils.boxing import DynaBox
+import sdnotify
 
-settings = LazySettings(
-    SETTINGS_FILE_FOR_DYNACONF="default.toml,user.toml",
-    ENVVAR_PREFIX_FOR_DYNACONF="PIHOLE",
-)
-settings.validators.register(Validator("INSTANCES", must_exist=True))
-settings.validators.validate()
-
-n = sdnotify.SystemdNotifier()
+from piholeinflux.pihole import Pihole
+from piholeinflux.settings import settings
 
 logger = logging.getLogger(__name__)
-
-
-class Pihole:
-    """Container object for a single Pi-hole instance."""
-
-    def __init__(self, name, url):
-        self.name = name
-        self.url = url
-        self.timeout = settings.as_int("REQUEST_TIMEOUT")
-        self.logger = logging.getLogger("pihole." + name)
-        self.logger.info("Initialized for %s (%s)", name, url)
-
-    def get_data(self):
-        """Retrieve API data from Pi-hole, and return as dict on success."""
-        response = requests.get(self.url, timeout=self.timeout)
-        if response.status_code == 200:
-            self.logger.debug("Got %d bytes", len(response.content))
-            return response.json()
-        else:
-            self.logger.error(
-                "Got unexpected response %d, %s", response.status_code, response.content
-            )
+n = sdnotify.SystemdNotifier()
 
 
 class Daemon(object):
@@ -74,6 +42,8 @@ class Daemon(object):
 
     def run(self):
         logger.info("Running daemon, reporting to InfluxDB at %s.", self.influx._host)
+        if self.single_run:
+            logger.info("Single run mode.")
         while True:
             for pi in self.piholes:
                 data = pi.get_data()
@@ -97,25 +67,3 @@ class Daemon(object):
         json_body = [{"measurement": "pihole", "tags": {"host": name}, "fields": resp}]
 
         self.influx.write_points(json_body)
-
-
-def main(single_run=False):
-    log_level = (settings.LOG_LEVEL).upper()
-    logging.basicConfig(
-        level=getattr(logging, log_level),
-        format="%(levelname)s: [%(name)s] %(message)s",
-    )
-
-    daemon = Daemon(single_run)
-
-    try:
-        daemon.run()
-    except KeyboardInterrupt:
-        sys.exit(0)  # pragma: no cover
-    except Exception:
-        logger.exception("Unexpected exception", exc_info=True)
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()

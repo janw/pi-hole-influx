@@ -1,11 +1,11 @@
 import pytest
-from piholeinflux import main
+from piholeinflux.base import main
 
 
 @pytest.mark.vcr()
 def test_main(mocker):
     """Test main function executed when running the daemon."""
-    mock_influx = mocker.patch("piholeinflux.InfluxDBClient")
+    mock_influx = mocker.patch("piholeinflux.daemon.InfluxDBClient")
 
     main(single_run=True)
 
@@ -16,9 +16,9 @@ def test_main(mocker):
 @pytest.mark.vcr()
 def test_main_exception(mocker):
     """Test main function, failing with exceptino inside of loop."""
-    mock_influx = mocker.patch("piholeinflux.InfluxDBClient")
+    mock_influx = mocker.patch("piholeinflux.daemon.InfluxDBClient")
     mock_get_data = mocker.patch(
-        "piholeinflux.Pihole.get_data", side_effect=ConnectionError
+        "piholeinflux.pihole.Pihole.get_data", side_effect=ConnectionError
     )
 
     with pytest.raises(SystemExit) as ctx:
