@@ -9,11 +9,50 @@ variables:
   DOCKER_TLS_CERTDIR: ""
 
 stages:
+  - test
   - build
   - tag
 
-before_script:
-  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+.tox:
+  # Define a default image here, used also by docs, coverage jobs
+  image: python:3.7
+  stage: test
+  script: tox -e ${CI_JOB_NAME}
+
+docs:
+  extends: .tox
+
+coverage:
+  extends: .tox
+
+py27:
+  extends: .tox
+  image: python:2.7
+  script: tox -e py27
+
+py34:
+  extends: .tox
+  image: python:3.4
+
+py35:
+  extends: .tox
+  image: python:3.5
+
+py36:
+  extends: .tox
+  image: python:3.6
+
+py37:
+  extends: .tox
+  image: python:3.7
+
+py38:
+  extends: .tox
+  image: python:3.8.0rc1
+
+.docker:
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
 build:
   stage: build
@@ -36,7 +75,7 @@ tag latest:
 ## ----
 
 .build special:
-  stage: build
+  extends: .docker
   variables:
     BUILD_DOCKERFILE: Dockerfile
   script:
@@ -58,5 +97,10 @@ tag latest:
   only:
     - master
 
-build armv7:  {extends: .build special, variables: {IMAGE_FLAVOR: armv7, BUILD_FROM: "arm32v7/python:3.6-alpine"}}
-tag armv7:    {extends: .tag special,   variables: {IMAGE_FLAVOR: armv7}}
+build armv7:
+  extends: .build special,
+  variables: { IMAGE_FLAVOR: armv7, BUILD_FROM: "arm32v7/python:3.6-alpine" }
+
+tag armv7:
+  extends: .tag special
+  variables: { IMAGE_FLAVOR: armv7 }
