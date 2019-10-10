@@ -27,7 +27,7 @@ pre-commit:
   # Define a default image here, used also by docs, coverage jobs
   stage: test
   before_script:
-    - pip install tox
+    - pip install -U tox
   script:
     - tox -e ${CI_JOB_NAME}
   cache:
