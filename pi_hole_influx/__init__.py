@@ -133,7 +133,3 @@ def main(single_run=False):
     except Exception:
         logger.exception("Unexpected exception", exc_info=True)
         sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
