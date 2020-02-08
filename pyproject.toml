@@ -1,3 +1,28 @@
+[tool.poetry]
+name = "pi-hole-influx"
+version = "0.1.0-alpha"
+description = "A python daemon to send Pi-Hole stats for Grafana to InfluxDB"
+authors = ["Jan Willhaus <mail@janwillhaus.de>"]
+license = "Apache-2.0"
+readme = "README.md"
+include = ["default.toml"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+influxdb = "^5.2.3"
+configparser = "^4.0.2"
+sdnotify = "^0.3.2"
+dynaconf = "^2.2.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.3.5"
+pytest-vcr = "^1.0.2"
+pytest-cov = "^2.8.1"
+pytest-mock = "^2.0.0"
+pytest-env = "^0.6.2"
+
+[tool.poetry.scripts]
+pi-hole-influx = 'pi_hole_influx:main'
 
 [tool.black]
 line-length = 88
@@ -11,3 +36,7 @@ exclude = '''
   | \.readme\-assets
 )/
 '''
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
