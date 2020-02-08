@@ -1,10 +1,12 @@
+ARG BUILD_FROM=python:3.6-alpine
 FROM registry.gitlab.com/janw/python-poetry:3.6-alpine as reqexport
 
 WORKDIR /src
 COPY pyproject.toml poetry.lock ./
 RUN poetry export -f requirements.txt -o requirements.txt
 
-FROM python:3.6-alpine
+ARG BUILD_FROM=python:3.6-alpine
+FROM $BUILD_FROM
 LABEL maintainer="Jan Willhaus <mail@janwillhaus.de>"
 ENV PYTHONUNBUFFERED=1
 
