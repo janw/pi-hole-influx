@@ -1,4 +1,3 @@
 influxdb>=5.0.0
-configparser>=3.5.0
 sdnotify>=0.3.2
 dynaconf>=2.0.2
