@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pi-hole-influx"
-version = "0.1.0-alpha"
+version = "0.1.0-alpha.1"
 description = "A python daemon to send Pi-Hole stats for Grafana to InfluxDB"
 authors = ["Jan Willhaus <mail@janwillhaus.de>"]
 license = "Apache-2.0"
@@ -8,9 +8,8 @@ readme = "README.md"
 include = ["default.toml"]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.5"
 influxdb = "^5.2.3"
-configparser = "^4.0.2"
 sdnotify = "^0.3.2"
 dynaconf = "^2.2.2"
 
