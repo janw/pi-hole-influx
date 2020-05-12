@@ -19,7 +19,7 @@ settings.validators.validate()
 
 n = sdnotify.SystemdNotifier()
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 class Pihole:
@@ -36,16 +36,34 @@ class Pihole:
         if not self.verify_ssl:
             self.logger.warning("Disabled SSL verification for Pi-hole requests")
 
+        if logger.level <= logging.INFO:
+            data = self.get_data()
+            keys = ", ".join(data.keys())
+            self.logger.info("Found keys {}.".format(keys,))
+
     def get_data(self):
         """Retrieve API data from Pi-hole, and return as dict on success."""
         response = requests.get(self.url, timeout=self.timeout, verify=self.verify_ssl,)
         if response.status_code == 200:
             self.logger.debug("Got %d bytes", len(response.content))
-            return response.json()
+            return self.sanitize_payload(response.json())
         else:
             self.logger.error(
                 "Got unexpected response %d, %s", response.status_code, response.content
             )
+
+    @staticmethod
+    def sanitize_payload(data):
+        if "gravity_last_updated" in data:
+            if "absolute" in data["gravity_last_updated"]:
+                data["gravity_last_updated"] = data["gravity_last_updated"]["absolute"]
+            else:
+                del data["gravity_last_updated"]
+
+        # Monkey-patch ads-% to be always float (type not enforced at API level)
+        data["ads_percentage_today"] = float(data.get("ads_percentage_today", 0.0))
+
+        return data
 
 
 class Daemon(object):
@@ -94,12 +112,6 @@ class Daemon(object):
             sleep(settings.as_int("REPORTING_INTERVAL"))  # pragma: no cover
 
     def send_msg(self, resp, name):
-        if "gravity_last_updated" in resp:
-            del resp["gravity_last_updated"]
-
-        # Monkey-patch ads-% to be always float (type not enforced at API level)
-        resp["ads_percentage_today"] = float(resp.get("ads_percentage_today", 0.0))
-
         json_body = [{"measurement": "pihole", "tags": {"host": name}, "fields": resp}]
 
         self.influx.write_points(json_body)
