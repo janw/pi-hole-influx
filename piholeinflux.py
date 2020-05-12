@@ -54,6 +54,7 @@ class Pihole:
 
     @staticmethod
     def sanitize_payload(data):
+        data = data.copy()
         if "gravity_last_updated" in data:
             if "absolute" in data["gravity_last_updated"]:
                 data["gravity_last_updated"] = data["gravity_last_updated"]["absolute"]
@@ -61,7 +62,8 @@ class Pihole:
                 del data["gravity_last_updated"]
 
         # Monkey-patch ads-% to be always float (type not enforced at API level)
-        data["ads_percentage_today"] = float(data.get("ads_percentage_today", 0.0))
+        if "ads_percentage_today" in data:
+            data["ads_percentage_today"] = float(data["ads_percentage_today"])
 
         return data
 
