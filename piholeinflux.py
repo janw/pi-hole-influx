@@ -32,9 +32,13 @@ class Pihole:
         self.logger = logging.getLogger("pihole." + name)
         self.logger.info("Initialized for %s (%s)", name, url)
 
+        self.verify_ssl = settings.as_bool("REQUEST_VERIFY_SSL")
+        if not self.verify_ssl:
+            self.logger.warning("Disabled SSL verification for Pi-hole requests")
+
     def get_data(self):
         """Retrieve API data from Pi-hole, and return as dict on success."""
-        response = requests.get(self.url, timeout=self.timeout)
+        response = requests.get(self.url, timeout=self.timeout, verify=self.verify_ssl,)
         if response.status_code == 200:
             self.logger.debug("Got %d bytes", len(response.content))
             return response.json()
