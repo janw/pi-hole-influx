@@ -36,6 +36,12 @@ A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be d
     --network host \
     registry.gitlab.com/janw/pi-hole-influx:armv7
   ```
+Before you can run the above, you will need to have your docker server authenticated with registry.gitlab.com:
+* Create a personal access token following this documentation: https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html (Save the personal access token somewhere safe. Once you leave or refresh the page, you won’t be able to access it again.)
+* Login to the registry with: 
+  ```bash
+  docker login -u <your-gitlab-username> -p <access-token> registry.gitlab.com
+  ```
 
 The following values are the defaults and will be used if not set:
 
@@ -47,7 +53,7 @@ The following values are the defaults and will be used if not set:
 `PIHOLE_INSTANCES` contains the Pi-hole instances that are to be reported. Multiple instances can given in a dict-like boxed syntax, known as [Inline Tables in TOML](https://github.com/toml-lang/toml#inline-table):
 
 ```bash
-PIHOLE_INSTANCES="{first_one="http://127.0.0.1/admin/api.php",second_pihole="http://192.168.42.79/admin/api.php"[,…]}"
+PIHOLE_INSTANCES="{first_one='http://127.0.0.1/admin/api.php',second_pihole='http://192.168.42.79/admin/api.php'[,…]}"
 ```
 
 Note that instances are prefixed by a custom name.
