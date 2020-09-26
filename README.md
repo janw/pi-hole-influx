@@ -5,9 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/janw/pi-hole-influx/badge.svg?branch=master)](https://coveralls.io/github/janw/pi-hole-influx?branch=master)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
-A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be displayed via Grafana.
-
-**Heads-up: the configuration options changed fundamentally in recent versions. Please read up on the current state below.**
+A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be displayed via Grafana. **Nowadays I store Pi-hole statistics in Prometheus using [eko/pihole-exporter](https://github.com/eko/pihole-exporter) instead. Thus am no longer actively using this project myself. I will try to merge Pull Reqests in a timely manner though.**
 
 ![Example Grafana Dashboard](.readme-assets/dashboard.png)
 
@@ -36,9 +34,12 @@ A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be d
     --network host \
     registry.gitlab.com/janw/pi-hole-influx:armv7
   ```
+
 Before you can run the above, you will need to have your docker server authenticated with registry.gitlab.com:
-* Create a personal access token following this documentation: https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html (Save the personal access token somewhere safe. Once you leave or refresh the page, you won’t be able to access it again.)
-* Login to the registry with: 
+
+* Create a personal access token [following the GitLab documentation](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html). Put the token somewhere safe. Once you leave or refresh the page, you won’t be able to access it again.
+* Login to the registry with:
+
   ```bash
   docker login -u <your-gitlab-username> -p <access-token> registry.gitlab.com
   ```
