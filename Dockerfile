@@ -1,5 +1,5 @@
-ARG BUILD_FROM=python:3.6-alpine
-FROM $BUILD_FROM
+ARG BUILD_PREFIX=
+FROM ${BUILD_PREFIX}python:3.7-alpine
 LABEL maintainer="Jan Willhaus <mail@janwillhaus.de>"
 
 ENV PYTHONUNBUFFERED=1

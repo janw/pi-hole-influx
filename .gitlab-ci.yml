@@ -96,7 +96,7 @@ build armv7:
   extends: .build special
   variables:
     IMAGE_FLAVOR: armv7
-    BUILD_FROM: "arm32v7/python:3.7"
+    BUILD_PREFIX: "arm32v7/"
 
 tag armv7:
   extends: .tag special

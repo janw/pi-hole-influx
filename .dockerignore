@@ -3,3 +3,4 @@
 htmlcov
 tests
 .readme-assets
+.tox
