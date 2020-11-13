@@ -76,7 +76,7 @@ tag latest:
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - docker pull $CI_REGISTRY_IMAGE:$IMAGE_FLAVOR || true
     - docker build
-      --build-arg BUILD_FROM=${BUILD_FROM}
+      --build-arg BUILD_PREFIX=${BUILD_PREFIX}
       --tag $CI_REGISTRY_IMAGE:${IMAGE_FLAVOR}-$CI_COMMIT_SHORT_SHA
       --file ${BUILD_DOCKERFILE} .
     - docker run --rm $CI_REGISTRY_IMAGE:${IMAGE_FLAVOR}-$CI_COMMIT_SHORT_SHA uname -m
