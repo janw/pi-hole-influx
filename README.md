@@ -113,7 +113,7 @@ cp user.toml.example user.toml
 vi user.toml
 ```
 
-Before starting the daemon for the first time, symlink the systemd service into place, reload, and enable the service.
+Before starting the daemon for the first time, symlink the systemd service into place, reload, and enable the service. Note that if you are using a user that isn't `pi`, you must edit piholeinflux.service and change `ExecStart` to run the correct path.
 
 ```bash
 sudo ln -s piholeinflux.service /etc/systemd/system/
