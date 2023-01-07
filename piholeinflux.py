@@ -39,11 +39,19 @@ class Pihole:
         if logger.level <= logging.INFO:
             data = self.get_data()
             keys = ", ".join(data.keys())
-            self.logger.info("Found keys {}.".format(keys,))
+            self.logger.info(
+                "Found keys {}.".format(
+                    keys,
+                )
+            )
 
     def get_data(self):
         """Retrieve API data from Pi-hole, and return as dict on success."""
-        response = requests.get(self.url, timeout=self.timeout, verify=self.verify_ssl,)
+        response = requests.get(
+            self.url,
+            timeout=self.timeout,
+            verify=self.verify_ssl,
+        )
         if response.status_code == 200:
             self.logger.debug("Got %d bytes", len(response.content))
             return self.sanitize_payload(response.json())
@@ -65,6 +73,37 @@ class Pihole:
         if "ads_percentage_today" in data:
             data["ads_percentage_today"] = float(data["ads_percentage_today"])
 
+        # Set fields in int_fields to int type
+        int_fields = [
+            "domains_being_blocked",
+            "dns_queries_today",
+            "ads_blocked_today",
+            "unique_domains",
+            "queries_forwarded",
+            "queries_cached",
+            "clients_ever_seen",
+            "unique_clients",
+            "dns_queries_all_types",
+            "reply_UNKNOWN",
+            "reply_NODATA",
+            "reply_NXDOMAIN",
+            "reply_CNAME",
+            "reply_IP",
+            "reply_DOMAIN",
+            "reply_RRNAME",
+            "reply_SERVFAIL",
+            "reply_REFUSED",
+            "reply_NOTIMP",
+            "reply_OTHER",
+            "reply_DNSSEC",
+            "reply_NONE",
+            "reply_BLOB",
+            "dns_queries_all_replies",
+            "privacy_level",
+        ]
+        for key in data:
+            if key in int_fields:
+                data[key] = int(data[key].replace(",", "").replace(".", ""))
         return data
 
 
