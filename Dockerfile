@@ -1,5 +1,5 @@
 ARG BUILD_PREFIX=
-FROM ${BUILD_PREFIX}python:3.7-alpine
+FROM ${BUILD_PREFIX}python:3.10-alpine
 LABEL maintainer="Jan Willhaus <mail@janwillhaus.de>"
 
 ENV PYTHONUNBUFFERED=1
