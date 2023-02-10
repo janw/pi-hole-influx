@@ -1,0 +1,44 @@
+on:
+  push:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2
+      matrix:
+        python-version:
+          - "3.9"
+          - "3.10"
+
+    ## TODO: Add pihole+influx services for e2e tests
+    # services:
+    #   pihole:
+    #     image: pihole/pihole
+    # …
+
+    container:
+      image: "python:${{ matrix.python-version }}"
+    steps:
+      - name: Check out
+        uses: actions/checkout@v3
+
+      - name: Set up pip cache
+        uses: actions/cache@v3
+        with:
+          path: "/.cache/pip"
+          key: py${{ matrix.python-version }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            py${{ matrix.python-version }}-pip-
+
+      - name: Install python dependencies
+        env:
+          PIP_CACHE_DIR: "/.cache/pip"
+        run: pip install -r requirements.txt -r requirements-tests.txt
+
+      - name: Run Pytest
+        run: pytest
+
+      - name: Upload coverage reports to Codecov
+        if: matrix.python-version == '3.10'
+        uses: codecov/codecov-action@v3
