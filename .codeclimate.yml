@@ -4,7 +4,5 @@ checks:
     config:
       threshold: 10
 plugins:
-  fixme:
-    enabled: true
   sonar-python:
     enabled: true
