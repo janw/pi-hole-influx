@@ -11,7 +11,7 @@ request_timeout = 10
 request_verify_ssl = "True"
 reporting_interval = 30
 
-instances="localhost=http://127.0.0.1/admin/api.php"
+instances="localhost=http://127.0.0.1/admin/api.php?summaryRaw"
 
 [development]
 

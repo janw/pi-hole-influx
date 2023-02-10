@@ -1,6 +1,5 @@
 # Pi-hole-Influx
 
-
 [![Build Status](https://github.com/janw/pi-hole-influx/actions/workflows/docker-build.yaml/badge.svg?branch=fix-readme-badges)](https://github.com/janw/pi-hole-influx/pkgs/container/pi-hole-influx)
 
 [![Coverage Status](https://codecov.io/gh/janw/pi-hole-influx/branch/master/graph/badge.svg?token=EZTLSEAZD9)](https://codecov.io/gh/janw/pi-hole-influx)
@@ -8,7 +7,7 @@
 
 [![Code style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
-A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be displayed via Grafana. **Nowadays I store Pi-hole statistics in Prometheus using [eko/pihole-exporter](https://github.com/eko/pihole-exporter) instead. Thus am no longer actively using this project myself. I will try to merge Pull Reqests in a timely manner though.**
+A simple daemonized script to report Pi-Hole stats to an InfluxDB (v1) instance, ready to be displayed via Grafana. **Nowadays I store Pi-hole statistics in Prometheus using [eko/pihole-exporter](https://github.com/eko/pihole-exporter) instead. Thus am no longer actively using this project myself. I will try to merge Pull Reqests in a timely manner though.**
 
 **⚠️ The docker image name has been changed to `ghcr.io/janw/pi-hole-influx`. Please update your deployment accordingly.**
 
@@ -25,28 +24,9 @@ A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be d
     -e PIHOLE_INFLUXDB_USERNAME="myusername" \
     -e PIHOLE_INFLUXDB_PASSWORD="mysupersecretpassword" \
     -e PIHOLE_INFLUXDB_DATABASE="pihole" \
-    -e PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php" \
-    ghcr.io/janw/pi-hole-influx
-  ```
-
-* For running it on a Raspberry Pi (arm v7 arch), use the dedicated `armv7` image tag:
-
-  ```bash
-  docker run \
-    -e PIHOLE_INFLUXDB_HOST="myhostname" \
-    -e PIHOLE_INFLUXDB_USERNAME="myusername" \
-    -e PIHOLE_INFLUXDB_PASSWORD="mysupersecretpassword" \
+    -e PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php?summaryRaw" \
     --network host \
-    ghcr.io/janw/pi-hole-influx:armv7
-  ```
-
-Before you can run the above, you will need to have your docker server authenticated with registry.gitlab.com:
-
-* Create a personal access token [following the GitLab documentation](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html). Put the token somewhere safe. Once you leave or refresh the page, you won’t be able to access it again.
-* Login to the registry with:
-
-  ```bash
-  docker login -u <your-gitlab-username> -p <access-token> registry.gitlab.com
+    ghcr.io/janw/pi-hole-influx
   ```
 
 The following values are the defaults and will be used if not set:
@@ -54,15 +34,29 @@ The following values are the defaults and will be used if not set:
 * `PIHOLE_INFLUXDB_PORT="8086"`
 * `PIHOLE_INFLUXDB_HOST="127.0.0.1"`
 * `PIHOLE_INFLUXDB_DATABASE="pihole"`
-* `PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php"`
+* `PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php?summaryRaw"`
+
+Note that the API URL is suffixed with `?summaryRaw` to allow pi-hole-influx to receive the correct data format.
+
+### Authentication (new as of November 2022)
+
+Newer versions of Pi-hole [require authentication when accessing the API](https://pi-hole.net/blog/2022/11/17/upcoming-changes-authentication-for-more-api-endpoints-required/#page-content) of an instance that has been configured with a web-interface password. If that is the case for your instance (as it should be), please make sure the API URL follows the format of
+
+```text
+http://<INSTANCE_HOST>/admin/api.php?summaryRaw&auth=<AUTH_TOKEN>
+```
+
+where `<AUTH_TOKEN>` should be replaced with the token you can find on the Pi-hole admin panel under Settings -> API / Web interface -> Show API token.
+
+### Multiple instances
 
 `PIHOLE_INSTANCES` contains the Pi-hole instances that are to be reported. Multiple instances can given in a dict-like boxed syntax, known as [Inline Tables in TOML](https://github.com/toml-lang/toml#inline-table):
 
 ```bash
-PIHOLE_INSTANCES="{first_one='http://127.0.0.1/admin/api.php',second_pihole='http://192.168.42.79/admin/api.php'[,…]}"
+PIHOLE_INSTANCES="{first_one='http://127.0.0.1/admin/api.php?summaryRaw',second_pihole='http://192.168.42.79/admin/api.php?summaryRaw'[,…]}"
 ```
 
-Note that instances are prefixed by a custom name.
+Note that instances can be prefixed by a custom name.
 
 ## Docker-compose example
 
