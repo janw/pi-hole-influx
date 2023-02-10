@@ -1,12 +1,11 @@
-ARG BUILD_PREFIX=
-FROM ${BUILD_PREFIX}python:3.7-alpine
+FROM python:3.10-alpine
 LABEL maintainer="Jan Willhaus <mail@janwillhaus.de>"
 
 ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 COPY requirements.txt ./
-RUN apk add --no-cache tini && \
+RUN apk add --no-cache 'tini>=0.19' && \
     pip install --no-cache-dir -r requirements.txt
 
 COPY user.toml.example ./user.toml
