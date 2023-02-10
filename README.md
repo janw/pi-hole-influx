@@ -1,9 +1,12 @@
 # Pi-hole-Influx
 
-![Build Status](https://gitlab.com/janw/pi-hole-influx/badges/master/pipeline.svg)
-![Coverage Status](https://gitlab.com/janw/pi-hole-influx/badges/master/coverage.svg?job=py37)
+
+[![Build Status](https://github.com/janw/pi-hole-influx/actions/workflows/docker-build.yaml/badge.svg?branch=fix-readme-badges)](https://github.com/janw/pi-hole-influx/pkgs/container/pi-hole-influx)
+
+[![Coverage Status](https://codecov.io/gh/janw/pi-hole-influx/branch/master/graph/badge.svg?token=EZTLSEAZD9)](https://codecov.io/gh/janw/pi-hole-influx)
 [![Maintainability](https://api.codeclimate.com/v1/badges/cfe71020e6505ca65cfc/maintainability)](https://codeclimate.com/github/janw/pi-hole-influx/maintainability)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+
+[![Code style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be displayed via Grafana. **Nowadays I store Pi-hole statistics in Prometheus using [eko/pihole-exporter](https://github.com/eko/pihole-exporter) instead. Thus am no longer actively using this project myself. I will try to merge Pull Reqests in a timely manner though.**
 

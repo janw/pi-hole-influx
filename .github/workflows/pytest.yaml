@@ -1,8 +1,10 @@
+name: Pytest
+
 on:
   push:
 
 jobs:
-  pytest:
+  test:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 2
@@ -42,3 +44,12 @@ jobs:
       - name: Upload coverage reports to Codecov
         if: matrix.python-version == '3.10'
         uses: codecov/codecov-action@v3
+
+      - name: Upload coverage reports to Codeclimate
+        uses: paambaati/codeclimate-action@v3.2.0
+        if: matrix.python-version == '3.10'
+        env:
+          GIT_COMMITTED_AT: "0"
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          debug: true
