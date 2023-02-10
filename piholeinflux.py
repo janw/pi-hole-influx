@@ -1,14 +1,14 @@
 #! /usr/bin/env python3
 
-import requests
-from time import sleep, localtime, strftime
-from influxdb import InfluxDBClient
-import sdnotify
-import sys
 import logging
+import sys
+from time import localtime, sleep, strftime
 
+import requests
+import sdnotify
 from dynaconf import LazySettings, Validator
 from dynaconf.utils.boxing import DynaBox
+from influxdb import InfluxDBClient
 
 settings = LazySettings(
     SETTINGS_FILE_FOR_DYNACONF="default.toml,user.toml",
@@ -39,11 +39,19 @@ class Pihole:
         if logger.level <= logging.INFO:
             data = self.get_data()
             keys = ", ".join(data.keys())
-            self.logger.info("Found keys {}.".format(keys,))
+            self.logger.info(
+                "Found keys {}.".format(
+                    keys,
+                )
+            )
 
     def get_data(self):
         """Retrieve API data from Pi-hole, and return as dict on success."""
-        response = requests.get(self.url, timeout=self.timeout, verify=self.verify_ssl,)
+        response = requests.get(
+            self.url,
+            timeout=self.timeout,
+            verify=self.verify_ssl,
+        )
         if response.status_code == 200:
             self.logger.debug("Got %d bytes", len(response.content))
             return self.sanitize_payload(response.json())

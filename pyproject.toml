@@ -11,21 +11,6 @@ exclude = '''
 )/
 '''
 
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-skipsdist = True
-isolated_build = True
-envlist = py35,py36,py37,py38
-
-[testenv]
-skip_install = True
-deps =
-  -rrequirements.txt
-  -rrequirements-tests.txt
-commands = pytest
-"""
-
 [build-system]
 requires = [ "setuptools >= 35.0.2", "wheel >= 0.29.0" ]
 build-backend = "setuptools.build_meta"
