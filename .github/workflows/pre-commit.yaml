@@ -1,3 +1,5 @@
+name: Pre-commit
+
 on:
   pull_request:
   push:

@@ -1,3 +1,5 @@
+name: Docker Build
+
 on:
   push:
     branches:
@@ -8,7 +10,7 @@ on:
   pull_request:
 
 jobs:
-  docker-build:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
