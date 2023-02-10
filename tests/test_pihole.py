@@ -1,6 +1,6 @@
 import pytest
-from piholeinflux import Pihole
 
+from piholeinflux import Pihole
 
 PAYLOAD_FIXTURE = {
     "domains_being_blocked": 86424,
