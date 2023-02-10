@@ -7,6 +7,8 @@
 
 A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be displayed via Grafana. **Nowadays I store Pi-hole statistics in Prometheus using [eko/pihole-exporter](https://github.com/eko/pihole-exporter) instead. Thus am no longer actively using this project myself. I will try to merge Pull Reqests in a timely manner though.**
 
+**⚠️ The docker image name has been changed to `ghcr.io/janw/pi-hole-influx`. Please update your deployment accordingly.**
+
 ![Example Grafana Dashboard](.readme-assets/dashboard.png)
 
 ## Setup (Using Docker)
@@ -21,7 +23,7 @@ A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be d
     -e PIHOLE_INFLUXDB_PASSWORD="mysupersecretpassword" \
     -e PIHOLE_INFLUXDB_DATABASE="pihole" \
     -e PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php" \
-    registry.gitlab.com/janw/pi-hole-influx
+    ghcr.io/janw/pi-hole-influx
   ```
 
 * For running it on a Raspberry Pi (arm v7 arch), use the dedicated `armv7` image tag:
@@ -32,7 +34,7 @@ A simple daemonized script to report Pi-Hole stats to an InfluxDB, ready to be d
     -e PIHOLE_INFLUXDB_USERNAME="myusername" \
     -e PIHOLE_INFLUXDB_PASSWORD="mysupersecretpassword" \
     --network host \
-    registry.gitlab.com/janw/pi-hole-influx:armv7
+    ghcr.io/janw/pi-hole-influx:armv7
   ```
 
 Before you can run the above, you will need to have your docker server authenticated with registry.gitlab.com:
@@ -67,7 +69,7 @@ If you want to run the daemon through Docker-compose, you might appreciate the c
 version: "2"
 services:
   piholeinflux:
-    image: registry.gitlab.com/janw/pi-hole-influx
+    image: ghcr.io/janw/pi-hole-influx
     container_name: piholeinflux
     restart: unless-stopped
     environment:
