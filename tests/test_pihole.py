@@ -56,17 +56,10 @@ def test_pihole_get_data(daemon_settings):
     assert "gravity_last_updated" in response
 
 
-def test_data_sanitizer():
+def test_data_sanitizer(daemon_settings):
     """Test proper sanitizing of data."""
 
-    def IsOfType(cls):
-        class IsOfType(cls):
-            def __eq__(self, other):
-                return isinstance(other, cls)
-
-        return IsOfType()
-
-    data = Pihole.sanitize_payload(PAYLOAD_FIXTURE)
+    data = Pihole("", "", daemon_settings).check_and_sanitize_payload(PAYLOAD_FIXTURE)
 
     assert data is not PAYLOAD_FIXTURE
     assert "domains_being_blocked" in data
@@ -76,8 +69,8 @@ def test_data_sanitizer():
     assert isinstance(data["gravity_last_updated"], int)
 
 
-def test_data_sanitizer_last_updated_dict():
+def test_data_sanitizer_last_updated_dict(daemon_settings):
     payload = {"gravity_last_updated": "we don't want this"}
-    data = Pihole.sanitize_payload(payload)
+    data = Pihole("", "", daemon_settings).check_and_sanitize_payload(payload)
 
     assert len(data) == 0
