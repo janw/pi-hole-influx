@@ -27,28 +27,28 @@ PAYLOAD_FIXTURE = {
 }
 
 
-def test_pihole_init():
+def test_pihole_init(daemon_settings):
     """Test object initialization."""
     config = {"name": "pihole", "url": "http://here.example"}
 
-    pihole = Pihole(**config)
+    pihole = Pihole(settings=daemon_settings, **config)
 
     assert hasattr(pihole, "name")
     assert hasattr(pihole, "url")
-    assert hasattr(pihole, "timeout")
+    assert hasattr(pihole, "request_timeout")
 
     assert pihole.name == "pihole"
     assert pihole.url == "http://here.example"
-    assert pihole.timeout == 10
-    assert pihole.verify_ssl is True
+    assert pihole.request_timeout == 10
+    assert pihole.request_verify_ssl is True
 
 
 @pytest.mark.vcr()
-def test_pihole_get_data():
+def test_pihole_get_data(daemon_settings):
     """Test getting data from an API endpoint."""
     config = {"name": "pihole1", "url": "http://127.0.0.1:8080/admin/api.php"}
 
-    pihole = Pihole(**config)
+    pihole = Pihole(settings=daemon_settings, **config)
 
     response = pihole.get_data()
     assert "domains_being_blocked" in response

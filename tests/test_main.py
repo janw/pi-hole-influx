@@ -4,14 +4,14 @@ from piholeinflux import main
 
 
 @pytest.mark.vcr()
-def test_main(mocker):
+def test_main(mocker, daemon_settings):
     """Test main function executed when running the daemon."""
-    mock_influx = mocker.patch("piholeinflux.InfluxDBClient")
+    mock_write = mocker.patch("piholeinflux.write_api.WriteApi.write")
 
-    main(single_run=True)
+    main(settings=daemon_settings, single_run=True)
 
-    assert mock_influx.called
-    assert mock_influx.call_count == 1
+    assert mock_write.called
+    assert mock_write.call_count == 1
 
 
 @pytest.mark.vcr()

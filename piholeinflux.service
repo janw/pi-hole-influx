@@ -6,9 +6,10 @@ After=network-online.target
 
 [Service]
 User=pi
-Type=notify
+Type=simple
 Environment=PYTHONUNBUFFERED=true
-ExecStart=/usr/bin/python3 /home/pi/pi-hole-influx/piholeinflux.py
+WorkingDirectory=/home/pi/pi-hole-influx
+ExecStart=/usr/bin/python3 ./piholeinflux.py
 Restart=always
 RestartSec=30
 
