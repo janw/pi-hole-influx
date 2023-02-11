@@ -6,11 +6,13 @@ WORKDIR /app
 
 COPY requirements.txt ./
 RUN apk add --no-cache 'tini>=0.19' && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    mkdir -p /config && \
+    touch /config/user.toml
 
-COPY user.toml.example ./user.toml
-COPY default.toml ./
-COPY piholeinflux.py ./
+COPY user.toml.example piholeinflux.py ./
+
+ENV PIHOLE_CONFIG_FILE=/config/user.toml
 
 ENTRYPOINT [ "tini", "--" ]
 CMD [ "python", "./piholeinflux.py" ]

@@ -7,9 +7,9 @@
 
 [![Code style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
-A simple daemonized script to report Pi-Hole stats to an InfluxDB (v1) instance, ready to be displayed via Grafana. **Nowadays I store Pi-hole statistics in Prometheus using [eko/pihole-exporter](https://github.com/eko/pihole-exporter) instead. Thus am no longer actively using this project myself. I will try to merge Pull Reqests in a timely manner though.**
+A simple daemonized script to report Pi-Hole stats to an InfluxDB v2 instance, ready to be displayed via Grafana.
 
-**⚠️ The docker image name has been changed to `ghcr.io/janw/pi-hole-influx`. Please update your deployment accordingly.**
+**⚠️ The docker image name has been changed to `ghcr.io/janw/pi-hole-influx`. Please update your deployment accordingly. If you are still using InfluxDB v1, please use [version 1.0](https://github.com/janw/pi-hole-influx/tree/v1.0) (`ghcr.io/janw/pi-hole-influx:v1`) of Pi-hole-Influx. Newer versions (tagged `:v2` and `:latest`) only support InfluxDB v2. ⚠️**
 
 ![Example Grafana Dashboard](.readme-assets/dashboard.png)
 
@@ -19,44 +19,28 @@ A simple daemonized script to report Pi-Hole stats to an InfluxDB (v1) instance,
 
   ```bash
   docker run \
-    -e PIHOLE_INFLUXDB_HOST="myhostname" \
-    -e PIHOLE_INFLUXDB_PORT="8086" \
-    -e PIHOLE_INFLUXDB_USERNAME="myusername" \
-    -e PIHOLE_INFLUXDB_PASSWORD="mysupersecretpassword" \
-    -e PIHOLE_INFLUXDB_DATABASE="pihole" \
-    -e PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php?summaryRaw" \
+    -e PIHOLE_INFLUXDB_URL=https://127.0.0.1:8086 \
+    -e PIHOLE_INFLUXDB_BUCKET=mybucket \
+    -e PIHOLE_INFLUXDB_TOKEN=mytoken \
+    -e PIHOLE_INFLUXDB_ORG=myorg \
+    -e PIHOLE_INSTANCES='[{
+          "name": "pihole",
+          "base_url": "http://127.0.0.1",
+          "api_token": "<your_pihole_api_token>"
+        }]' \
     --network host \
-    ghcr.io/janw/pi-hole-influx
+    ghcr.io/janw/pi-hole-influx:v2
   ```
 
-The following values are the defaults and will be used if not set:
+where `PIHOLE_INSTANCES` is a JSON-formatted list of instances to monitor with required fields of `name` and `base_url` and an (theorically optional but generally required) `api_token` (see below).
 
-* `PIHOLE_INFLUXDB_PORT="8086"`
-* `PIHOLE_INFLUXDB_HOST="127.0.0.1"`
-* `PIHOLE_INFLUXDB_DATABASE="pihole"`
-* `PIHOLE_INSTANCES="localhost=http://127.0.0.1/admin/api.php?summaryRaw"`
+### Authentication
 
-Note that the API URL is suffixed with `?summaryRaw` to allow pi-hole-influx to receive the correct data format.
+Newer versions of Pi-hole [require authentication when accessing the API](https://pi-hole.net/blog/2022/11/17/upcoming-changes-authentication-for-more-api-endpoints-required/#page-content) of an instance that has been configured with a web-interface password. If that is the case for your instance (as it should be), please make sure to include the `api_token` in the instance config. You can find in the Pi-hole admin panel under Settings -> API / Web interface -> Show API token.
 
-### Authentication (new as of November 2022)
+### Configuration file
 
-Newer versions of Pi-hole [require authentication when accessing the API](https://pi-hole.net/blog/2022/11/17/upcoming-changes-authentication-for-more-api-endpoints-required/#page-content) of an instance that has been configured with a web-interface password. If that is the case for your instance (as it should be), please make sure the API URL follows the format of
-
-```text
-http://<INSTANCE_HOST>/admin/api.php?summaryRaw&auth=<AUTH_TOKEN>
-```
-
-where `<AUTH_TOKEN>` should be replaced with the token you can find on the Pi-hole admin panel under Settings -> API / Web interface -> Show API token.
-
-### Multiple instances
-
-`PIHOLE_INSTANCES` contains the Pi-hole instances that are to be reported. Multiple instances can given in a dict-like boxed syntax, known as [Inline Tables in TOML](https://github.com/toml-lang/toml#inline-table):
-
-```bash
-PIHOLE_INSTANCES="{first_one='http://127.0.0.1/admin/api.php?summaryRaw',second_pihole='http://192.168.42.79/admin/api.php?summaryRaw'[,…]}"
-```
-
-Note that instances can be prefixed by a custom name.
+An alternative to configure Pi-hole-Influx through environment variables is a TOML-formatted configuration file. See [user.toml.example](user.toml.example) for an example configuration. It can be mounted into the container under `/config/user.toml` to provide the configuration instead.
 
 ## Docker-compose example
 
@@ -66,30 +50,39 @@ If you want to run the daemon through Docker-compose, you might appreciate the c
 version: "2"
 services:
   piholeinflux:
-    image: ghcr.io/janw/pi-hole-influx
+    image: ghcr.io/janw/pi-hole-influx:v2
     container_name: piholeinflux
     restart: unless-stopped
     environment:
 
       # Replace details with your InfluxDB's hostname and credentials
-      PIHOLE_INFLUXDB_HOST: "10.10.10.1"
-      PIHOLE_INFLUXDB_PORT: "8086"
-      PIHOLE_INFLUXDB_USERNAME: "pihole"
-      PIHOLE_INFLUXDB_PASSWORD: "pihole"
-      PIHOLE_INFLUXDB_DATABASE: "pihole"
+      PIHOLE_INFLUXDB_URL: "http://10.10.10.1:8086"
+      PIHOLE_INFLUXDB_TOKEN: "mytoken"
+      PIHOLE_INFLUXDB_BUCKET: "pihole"
+      PIHOLE_INFLUXDB_ORG: "eee0001234asdf"
 
-      # Replace with your Pi-Hole's address including path to API below
-      PIHOLE_INSTANCES: "pihole=http://10.10.0.10/admin/api.php"
+      # Replace with your Pi-Hole's base_url and api_token below
+      PIHOLE_INSTANCES: |
+        [{
+          "name": "pihole",
+          "base_url": "https://127.0.0.1",
+          "api_token": "<your_pihole_api_token>"
+        }]
+
+      # Additional options that can be adjusted
+      PIHOLE_REQUEST_TIMEOUT: "15"  # seconds
+      PIHOLE_REQUEST_VERIFY_SSL: "False"
+      PIHOLE_REPORTING_INTERVAL: "90"  # seconds
 
     # OPTIONAL: Instead of the aobove environment variables,
     #           use a custom copy of the user.toml config file.
     volumes:
-      - ./custom/config.toml:/user.toml
+      - ./custom/config.toml:/config/user.toml
 ```
 
 ## Setup (Traditional Way)
 
-As Pi-hole (as the name suggests) is built specifically with the Raspberry Pi in mind (and I run it on there as well), the following steps assume an instance of Pi-hole on Raspbian Strech Lite, with no additional modifications so far. Piholestatus will be configured to run on the same Pi.
+As Pi-hole (as the name suggests) is built specifically with the Raspberry Pi in mind, the following steps assume an instance of Pi-hole running on a Raspbian installation, with no additional modifications. Pi-hole-Influx will be configured to run on the same Pi.
 
 First install the necessary packages via apt as Raspbian Lite does have neither git nor pip installed.
 
@@ -112,10 +105,10 @@ cp user.toml.example user.toml
 vi user.toml
 ```
 
-Before starting the daemon for the first time, symlink the systemd service into place, reload, and enable the service. Note that if you are using a user that isn't `pi`, you must edit piholeinflux.service and change `ExecStart` to run the correct path. You must also change `User` to the correct user.
+Before starting the daemon for the first time, symlink the systemd service into place, reload, and enable the service. Note that if you are using a user that isn't `pi`, you must edit piholeinflux.service and change the `User` and `WorkingDirectory` to match yours.
 
 ```bash
-sudo ln -s piholeinflux.service /etc/systemd/system/
+sudo cp piholeinflux.service /etc/systemd/system/
 sudo systemctl --system daemon-reload
 sudo systemctl enable piholeinflux.service
 ```
@@ -123,21 +116,18 @@ sudo systemctl enable piholeinflux.service
 Now you're ready to start the daemon. Wait a few seconds to check its status.
 
 ```bash
-sudo systemctl start piholeinflux.service
-sudo systemctl status piholeinflux.service
-```
+$ sudo systemctl start piholeinflux.service
+$ sudo systemctl status piholeinflux.service
 
-The status should look as follows. Note the `Status:` line showing the last time, the daemon reported to InfluxDB:
-
-```text
 ● piholeinflux.service - Pi-hole-Influx - Send Pi-hole statistics to InfluxDB for visualization
-   Loaded: loaded (/home/pi/pi-hole-influx/piholeinflux.service; enabled; vendor preset: enabled)
-   Active: active (running) since Fri 2018-06-22 19:03:56 UTC; 10min ago
-     Docs: https://github.com/janw/pi-hole-influx
- Main PID: 21329 (python)
-   Status: "Reported to InfluxDB at 2018-06-22 19:14:09 +0000"
-   CGroup: /system.slice/piholeinflux.service
-           └─21329 /usr/bin/python /home/pi/pi-hole-influx/piholeinflux.py
+     Loaded: loaded (/etc/systemd/system/piholeinflux.service; enabled; vendor preset: enabled)
+     Active: active (running) since Sat 2023-02-11 22:22:30 CET; 56s ago
+       Docs: https://github.com/janw/pi-hole-influx
+   Main PID: 776022 (python3)
+      Tasks: 3 (limit: 1830)
+        CPU: 1.059s
+     CGroup: /system.slice/piholeinflux.service
+             └─776022 /usr/bin/python3 ./piholeinflux.py
 ```
 
 ## Set up a Grafana Dashboard

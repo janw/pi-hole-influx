@@ -1,17 +1,19 @@
-[global]
+influxdb_url = "http://127.0.0.1:8086"
+influxdb_token = "asdf1234=="
+influxdb_org = "eee000"
+influxdb_bucket = "pihole"
 
-# All options should be wrapped in quotes
+request_timeout = 3  # in seconds
+request_verify_ssl = "True"  # must be a string of true/false
+reporting_interval = 15 # in seconds
 
-# influxdb_host = ""
-# influxdb_port = ""
-# influxdb_database = ""
-# influxdb_username = ""
-# influxdb_password = ""
+# Multiple instances are placed in an array of tables under `instances`
+[[instances]]
+name = "pihole"
+base_url = "http://127.0.0.1/"
+api_token = "dummy"
 
-# request_timeout = "10"
-# request_verify_ssl = "False"
-# reporting_interval = "30"
-
-# instances="localhost=http://127.0.0.1/admin/api.php"
-# instances={pihole="http://10.10.0.10/admin/api.php", second instance="http://192.168.0.1/admin/api.php"}
-# instances=["http://10.10.0.10/admin/api.php", "http://192.168.0.1/admin/api.php"]
+[[instances]]
+name = "second-instance"
+base_url = "http://192.168.0.1/some/subpath"
+api_token = "dummy"

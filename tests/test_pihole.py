@@ -27,28 +27,28 @@ PAYLOAD_FIXTURE = {
 }
 
 
-def test_pihole_init():
+def test_pihole_init(daemon_settings):
     """Test object initialization."""
     config = {"name": "pihole", "url": "http://here.example"}
 
-    pihole = Pihole(**config)
+    pihole = Pihole(settings=daemon_settings, **config)
 
     assert hasattr(pihole, "name")
     assert hasattr(pihole, "url")
-    assert hasattr(pihole, "timeout")
+    assert hasattr(pihole, "request_timeout")
 
     assert pihole.name == "pihole"
     assert pihole.url == "http://here.example"
-    assert pihole.timeout == 10
-    assert pihole.verify_ssl is True
+    assert pihole.request_timeout == 10
+    assert pihole.request_verify_ssl is True
 
 
 @pytest.mark.vcr()
-def test_pihole_get_data():
+def test_pihole_get_data(daemon_settings):
     """Test getting data from an API endpoint."""
     config = {"name": "pihole1", "url": "http://127.0.0.1:8080/admin/api.php"}
 
-    pihole = Pihole(**config)
+    pihole = Pihole(settings=daemon_settings, **config)
 
     response = pihole.get_data()
     assert "domains_being_blocked" in response
@@ -56,17 +56,10 @@ def test_pihole_get_data():
     assert "gravity_last_updated" in response
 
 
-def test_data_sanitizer():
+def test_data_sanitizer(daemon_settings):
     """Test proper sanitizing of data."""
 
-    def IsOfType(cls):
-        class IsOfType(cls):
-            def __eq__(self, other):
-                return isinstance(other, cls)
-
-        return IsOfType()
-
-    data = Pihole.sanitize_payload(PAYLOAD_FIXTURE)
+    data = Pihole("", "", daemon_settings).check_and_sanitize_payload(PAYLOAD_FIXTURE)
 
     assert data is not PAYLOAD_FIXTURE
     assert "domains_being_blocked" in data
@@ -76,8 +69,8 @@ def test_data_sanitizer():
     assert isinstance(data["gravity_last_updated"], int)
 
 
-def test_data_sanitizer_last_updated_dict():
+def test_data_sanitizer_last_updated_dict(daemon_settings):
     payload = {"gravity_last_updated": "we don't want this"}
-    data = Pihole.sanitize_payload(payload)
+    data = Pihole("", "", daemon_settings).check_and_sanitize_payload(payload)
 
     assert len(data) == 0
